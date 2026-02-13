@@ -1,0 +1,42 @@
+Listagem de caminhos de pasta
+O n£mero de s‚rie do volume ‚ 44E2-1797
+C:.
+|   estrutura.txt
+|   pom.xml
+|   README.md
+|   
+\---src
+    \---main
+        +---java
+        |   \---com
+        |       \---comonier
+        |           \---virtualfilter
+        |               |   VirtualFilter.java
+        |               |   
+        |               +---commands
+        |               |       FilterCommands.java
+        |               |       
+        |               +---database
+        |               |       DatabaseManager.java
+        |               |       
+        |               +---integration
+        |               |       ShopGUIHook.java
+        |               |       
+        |               +---listeners
+        |               |       ChatListener.java
+        |               |       FilterProcessor.java
+        |               |       InventoryListener.java
+        |               |       
+        |               +---manager
+        |               |       ConfirmationManager.java
+        |               |       FilterManager.java
+        |               |       InfinityManager.java
+        |               |       
+        |               \---menu
+        |                       FilterMenu.java
+        |                       
+        \---resources
+                config.yml
+                messages.yml
+                plugin.yml
+                

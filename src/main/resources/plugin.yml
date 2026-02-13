@@ -1,0 +1,69 @@
+name: VirtualFilter
+version: 1.0
+main: com.comonier.virtualfilter.VirtualFilter
+api-version: 1.21
+author: comonier
+description: Professional Virtual Filtering System with AutoBlock, InfinityStack, and AutoSell.
+
+# --- Registro de Comandos ---
+commands:
+  abf:
+    description: Opens the AutoBlockFilter menu.
+    permission: virtualfilter.use
+  addabf:
+    description: Adds the item in hand to the first free ABF slot.
+    permission: virtualfilter.use
+  isf:
+    description: Opens the InfinityStackFilter menu.
+    permission: virtualfilter.use
+  addisf:
+    description: Adds the item in hand to the first free ISF slot.
+    permission: virtualfilter.use
+  asf:
+    description: Opens the AutoSellFilter menu.
+    permission: virtualfilter.use
+  addasf:
+    description: Adds the item in hand to the first free ASF slot.
+    permission: virtualfilter.use
+  tfc:
+    description: Toggle filter deletion confirmation.
+    permission: virtualfilter.use
+  vfat:
+    description: Toggle AutoSell Action Bar notifications.
+    permission: virtualfilter.use
+  vftc:
+    description: Toggle deletion confirmation.
+    permission: virtualfilter.use
+  vflang:
+    description: Changes personal language (en/pt).
+    permission: virtualfilter.use
+  vfhelp:
+    description: Shows all commands and features.
+    permission: virtualfilter.use
+  vfreload:
+    description: Reloads plugin configurations and prices.
+    permission: virtualfilter.admin
+    usage: /vfreload
+
+# --- Registro de Permissões ---
+permissions:
+  virtualfilter.use:
+    description: Standard permission for all players to use basic features.
+    default: true
+  virtualfilter.admin:
+    description: Administrative permission to reload the plugin.
+    default: op
+
+  # DOCUMENTAÇÃO DE SLOTS DINÂMICOS (Para referência do Dono/LuckPerms)
+  # O sistema verifica permissões numéricas para liberar slots nos menus (1-54).
+  # Exemplos de uso no LuckPerms:
+  # - virtualfilter.abf.9   : Libera os primeiros 9 slots (1 linha) no AutoBlock.
+  # - virtualfilter.isf.27  : Libera os primeiros 27 slots (3 linhas) no InfinityStack.
+  # - virtualfilter.asf.54  : Libera todos os 54 slots no AutoSell.
+  
+  virtualfilter.abf.*:
+    description: Numerical permission to unlock ABF slots.
+  virtualfilter.isf.*:
+    description: Numerical permission to unlock ISF slots.
+  virtualfilter.asf.*:
+    description: Numerical permission to unlock ASF slots.

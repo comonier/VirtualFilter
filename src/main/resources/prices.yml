@@ -1,0 +1,10 @@
+
+# VirtualFilter - AutoSell Prices
+# Format: MATERIAL_NAME: PRICE_PER_UNIT
+# Example: DIAMOND: 100.0
+
+DIAMOND: 100.0
+IRON_INGOT: 50.0
+GOLD_INGOT: 75.0
+COBBLESTONE: 0.5
+DIRT: 0.1
