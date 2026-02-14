@@ -1,6 +1,6 @@
 # 💎 VirtualFilter - Professional Filtering System
 
-1.21.11
+1.21.11 ( you can test the plugin on my server: ip: hu3.org [java] and [bedrock] )
 
 **VirtualFilter** is a high-performance, standalone Minecraft plugin designed for Factions and Survival servers. It allows players to manage their loot efficiently through three specialized virtual systems: **Auto-Block**, **Infinity-Stack**, and **Auto-Sell**.
 
