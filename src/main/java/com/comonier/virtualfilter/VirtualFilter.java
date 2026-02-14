@@ -6,40 +6,34 @@ import com.comonier.virtualfilter.listeners.*;
 import com.comonier.virtualfilter.manager.*;
 import com.comonier.virtualfilter.integration.ShopGUIHook;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.io.File;
 
 public class VirtualFilter extends JavaPlugin {
     private static VirtualFilter instance;
-    private static Economy econ = null; // Variável para armazenar a economia do Vault
+    private static Economy econ = null;
     private DatabaseManager dbManager;
-    private ConfirmationManager confirmationManager;
     private InfinityManager infinityManager;
+    private FileConfiguration messages;
 
     @Override
     public void onEnable() {
         instance = this;
-        
-        // 1. Inicializa arquivos de configuração
         saveDefaultConfig();
-        
-        // 2. Inicializa o sistema de preços interno (prices.yml)
+        loadMessages();
         ShopGUIHook.loadPrices();
 
-        // 3. Inicializa a conexão com o Vault (Dinheiro)
         if (!setupEconomy()) {
-            getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
-            getServer().getPluginManager().disablePlugin(this);
-            return;
+            getLogger().severe("Vault not found! AutoSell will not pay players.");
         }
 
-        // 4. Inicializa Gerenciadores e Banco de Dados
         this.dbManager = new DatabaseManager();
         this.dbManager.setupDatabase();
-        this.confirmationManager = new ConfirmationManager();
         this.infinityManager = new InfinityManager();
 
-        // 5. Registra Comandos
         FilterCommands cmd = new FilterCommands();
         getCommand("abf").setExecutor(cmd);
         getCommand("isf").setExecutor(cmd);
@@ -47,65 +41,44 @@ public class VirtualFilter extends JavaPlugin {
         getCommand("addabf").setExecutor(cmd);
         getCommand("addisf").setExecutor(cmd);
         getCommand("addasf").setExecutor(cmd);
-        getCommand("tfc").setExecutor(cmd);
+        getCommand("vfat").setExecutor(cmd);
+        getCommand("vflang").setExecutor(cmd);
+        getCommand("vfhelp").setExecutor(cmd);
         getCommand("vfreload").setExecutor(cmd);
 
-        // 6. Registra Eventos
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
-        getServer().getPluginManager().registerEvents(new ChatListener(), this);
         getServer().getPluginManager().registerEvents(new FilterProcessor(), this);
 
-        getLogger().info("VirtualFilter has been enabled with Vault integration!");
+        getLogger().info("VirtualFilter v1.2 enabled successfully!");
     }
 
-    /**
-     * Configura a integração com o Vault Economy.
-     */
+    private void loadMessages() {
+        File file = new File(getDataFolder(), "messages.yml");
+        if (!file.exists()) saveResource("messages.yml", false);
+        messages = YamlConfiguration.loadConfiguration(file);
+    }
+
+    public String getMsg(String playerLang, String path) {
+        String lang = (playerLang == null) ? getConfig().getString("language", "en") : playerLang;
+        return messages.getString(lang + "." + path, "Message not found: " + path);
+    }
+
     private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
+        if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            return false;
-        }
+        if (rsp == null) return false;
         econ = rsp.getProvider();
         return econ != null;
     }
 
-    /**
-     * Recarrega configurações e preços sem reiniciar o servidor.
-     */
     public void reloadPlugin() {
         reloadConfig();
+        loadMessages();
         ShopGUIHook.loadPrices();
-        getLogger().info("Configuration and prices reloaded.");
     }
 
-    @Override
-    public void onDisable() {
-        getLogger().info("VirtualFilter has been disabled.");
-    }
-
-    // --- Getters Públicos ---
-    
-    public static VirtualFilter getInstance() { 
-        return instance; 
-    }
-
-    public static Economy getEconomy() {
-        return econ;
-    }
-    
-    public DatabaseManager getDbManager() { 
-        return dbManager; 
-    }
-    
-    public ConfirmationManager getConfirmationManager() { 
-        return confirmationManager; 
-    }
-    
-    public InfinityManager getInfinityManager() { 
-        return infinityManager; 
-    }
+    public static VirtualFilter getInstance() { return instance; }
+    public static Economy getEconomy() { return econ; }
+    public DatabaseManager getDbManager() { return dbManager; }
+    public InfinityManager getInfinityManager() { return infinityManager; }
 }

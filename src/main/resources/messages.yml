@@ -1,35 +1,29 @@
-# VirtualFilter - Language Configuration
-# Default language: English (en)
+# ==========================================================
+#             VirtualFilter - Messages
+# ==========================================================
 
-prefix: "§8[§6VirtualFilter§8] "
+en:
+  prefix: "§6§l[VirtualFilter] "
+  added: "§aItem §f%item% §aadded to slot %slot%."
+  removed: "§aFilter removed."
+  replaced: "§aFilter in slot %slot% replaced by §f%item%."
+  no_permission: "§cNo permission."
+  inv_full: "§cYour inventory is full!"
+  withdraw: "§aWithdrawn %amount%x %item% from storage."
+  asf_actionbar: "§a+$%price% §7(Sold %amount%x %item%)"
+  isf_actionbar: "§b+%amount% §7%item% (Stored in ISF)"
+  toggle_on: "§7Feature §aENABLED"
+  toggle_off: "§7Feature §cDISABLED"
 
-# General Messages
-no_permission: "§cYou don't have enough slots! Get a higher rank to unlock more."
-only_players: "§cOnly players can execute this command."
-item_added: "§aItem {item} added to {system} slot {slot}!"
-item_in_hand_required: "§cYou must be holding an item in your hand!"
-inventory_full: "§cInventory Full! Item dropped on the ground."
-
-# Confirmation System (TFC)
-confirmation_required: "§7Do you want to delete record §e{slot} §7from §e{system}§7?"
-confirmation_instructions: "§7Type §ay §7to confirm, or §ec §7to cancel."
-confirmation_canceled: "§cDeletion canceled."
-confirmation_deleted: "§aRecord removed successfully."
-tfc_toggle_on: "§aFilter confirmation: §lON"
-tfc_toggle_off: "§cFilter confirmation: §lOFF"
-
-# InfinityStackFilter (ISF) Specific
-isf_withdrawn: "§aWithdrawn {amount}x {item} from slot {slot}."
-isf_sold: "§aSold {amount}x {item} for §2$§a{price}§a."
-isf_no_stock: "§cYou don't have enough stock of this item!"
-
-# Menu Titles
-menu_title_abf: "§8§lAutoBlockFilter"
-menu_title_isf: "§8§lInfinityStackFilter"
-menu_title_asf: "§8§lAutoSellFilter"
-
-# Slot Lore (Locked/VIP)
-slot_locked_name: "§cSlot {slot} §l- LOCKED"
-slot_locked_lore:
-  - "§7This slot is restricted."
-  - "§eRank up §7to unlock this space."
+pt:
+  prefix: "§6§l[VirtualFilter] "
+  added: "§aItem §f%item% §aadicionado ao slot %slot%."
+  removed: "§aFiltro removido."
+  replaced: "§aFiltro no slot %slot% substituído por §f%item%."
+  no_permission: "§cSem permissão."
+  inv_full: "§cSeu inventário está cheio!"
+  withdraw: "§aRetirado %amount%x %item% do estoque."
+  asf_actionbar: "§a+$%price% §7(Vendido %amount%x %item%)"
+  isf_actionbar: "§b+%amount% §7%item% (Estocado no ISF)"
+  toggle_on: "§7Função §aATIVADA"
+  toggle_off: "§7Função §cDESATIVADA"

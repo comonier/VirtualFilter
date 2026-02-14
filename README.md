@@ -1,6 +1,6 @@
 # 💎 VirtualFilter - Professional Filtering System
 
-![Minecraft Version](https://img.shields.io)
+![Minecraft Version](1.21.11)
 ![Build Success](https://img.shields.io)
 ![License](https://img.shields.io)
 
@@ -11,29 +11,27 @@
 ## 🚀 Key Features
 
 *   **🚫 AutoBlockFilter (ABF):** Automatically prevents unwanted items from entering the player's inventory.
-*   **📦 InfinityStackFilter (ISF):** Stores items in a virtual infinite warehouse. Players can withdraw items stack-by-stack whenever they need.
+*   **📦 InfinityStackFilter (ISF):** Stores items in a virtual infinite warehouse.
+    *   **Auto-Merge:** If you add an item already in your filter, it automatically merges the stock instead of creating a duplicate slot.
+    *   **Inventory Suck:** Instantly pulls all matching items from your inventory into the storage upon filter creation.
 *   **💰 AutoSellFilter (ASF):** Automatically sells collected items at custom prices defined in `prices.yml`, with direct deposits via **Vault**.
 *   **🎮 Modern UX:** 
-    *   **Quick-Add:** `Shift + Left Click` on any item in your inventory to add it instantly to a filter.
-    *   **Drag & Drop:** Replace existing filters by simply dropping a new item over them in the menu.
-    *   **Action Bar Notifications:** Real-time sale updates on your action bar (can be toggled via `/vfat`).
-*   **🌍 Multi-Language:** Built-in support for **English** and **Portuguese**. Each player can choose their preferred language via `/vflang`.
-*   **🛡️ Safety First:** Automatically blocks non-stackable items (tools, armor, etc.) to prevent accidental loss.
+    *   **Quick-Add:** `Shift + Left Click` on any item in your inventory to add it instantly.
+    *   **Drag & Drop:** Replace or add filters by simply dropping a new item over the menu slots.
+    *   **Action Bar Notifications:** Real-time sale and storage updates (toggle via `/vfat`).
+*   **🌍 Multi-Language:** Support for **English** and **Portuguese**. Players choose via `/vflang`.
+*   **🛡️ Safety First:** Blocks non-stackable items (tools, armor) to prevent accidental loss.
 
 ---
 
 ## 🛠 Commands & Permissions
-
 | Command | Description | Permission |
 | :--- | :--- | :--- |
-| `/abf` | Opens the Auto-Block menu | `virtualfilter.use` |
-| `/isf` | Opens the Infinity-Stack menu | `virtualfilter.use` |
-| `/asf` | Opens the Auto-Sell menu | `virtualfilter.use` |
-| `/add<type>` | Adds the held item to a filter (e.g., `/addabf`) | `virtualfilter.use` |
+| `/abf`, `/isf`, `/asf` | Opens the respective filter menus | `virtualfilter.use` |
+| `/add<type>` | Adds/Merges held item to filter (e.g., `/addisf`) | `virtualfilter.use` |
 | `/vfhelp` | Shows the dynamic help menu | `virtualfilter.use` |
 | `/vflang` | Changes personal language (`en` / `pt`) | `virtualfilter.use` |
-| `/vfat` | Toggles Action Bar sale notifications | `virtualfilter.use` |
-| `/vftc` | Toggles deletion confirmation | `virtualfilter.use` |
+| `/vfat` | Toggles Action Bar notifications | `virtualfilter.use` |
 | `/vfreload` | Reloads configurations and prices | `virtualfilter.admin` |
 
 ### 🔑 Slot Management
@@ -46,7 +44,7 @@ Unlock slots dynamically using permissions (1 to 54):
 
 ## 📦 Requirements
 
-*   **Server:** [PaperMC](https://papermc.io) or [Spigot](https://papermc.io/downloads/paper) (1.21.1+)
+*   **Server:** [PaperMC](https://papermc.io/downloads/paper) (1.21.1+)
 *   **Economy:** [Vault](https://www.spigotmc.org/resources/vault.34315/) (Required for Auto-Sell payments)
 *   **Permissions:** [LuckPerms](https://luckperms.net) (Recommended for slot management)
 

@@ -14,10 +14,10 @@ public class DatabaseManager {
             if (!folder.exists()) folder.mkdirs();
             connection = DriverManager.getConnection("jdbc:sqlite:" + new File(folder, "storage.db"));
             try (Statement s = connection.createStatement()) {
-                // Tabela de filtros
+                // Tabela de filtros com Chave Primária Composta (Corrige o erro de INSERT)
                 s.execute("CREATE TABLE IF NOT EXISTS player_filters (uuid TEXT, filter_type TEXT, slot_id INTEGER, material TEXT, amount BIGINT DEFAULT 0, PRIMARY KEY (uuid, filter_type, slot_id))");
-                // Tabela de configurações pessoais (Toggle Action Bar, Confirmação e Idioma)
-                s.execute("CREATE TABLE IF NOT EXISTS player_settings (uuid TEXT PRIMARY KEY, actionbar_enabled BOOLEAN DEFAULT 1, confirm_enabled BOOLEAN DEFAULT 1, language TEXT DEFAULT 'en')");
+                // Tabela de configurações
+                s.execute("CREATE TABLE IF NOT EXISTS player_settings (uuid TEXT PRIMARY KEY, actionbar_enabled BOOLEAN DEFAULT 1, language TEXT DEFAULT 'en')");
             }
         } catch (SQLException e) { e.printStackTrace(); }
     }
@@ -29,19 +29,17 @@ public class DatabaseManager {
         try (PreparedStatement ps = connection.prepareStatement("SELECT language FROM player_settings WHERE uuid = ?")) {
             ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                String lang = rs.getString("language");
-                if (lang != null) return lang;
-            }
+            if (rs.next()) return rs.getString("language");
         } catch (SQLException e) { e.printStackTrace(); }
         return VirtualFilter.getInstance().getConfig().getString("language", "en");
     }
 
     public void setPlayerLanguage(UUID uuid, String lang) {
-        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO player_settings (uuid, language) VALUES (?, ?) ON CONFLICT(uuid) DO UPDATE SET language = ?")) {
+        // INSERT OR REPLACE: Funciona em qualquer SQLite e resolve o erro "near ON"
+        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, language, actionbar_enabled) VALUES (?, ?, (SELECT actionbar_enabled FROM player_settings WHERE uuid = ?))")) {
             ps.setString(1, uuid.toString());
             ps.setString(2, lang);
-            ps.setString(3, lang);
+            ps.setString(3, uuid.toString());
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }
@@ -53,35 +51,15 @@ public class DatabaseManager {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getBoolean("actionbar_enabled");
         } catch (SQLException e) { e.printStackTrace(); }
-        return VirtualFilter.getInstance().getConfig().getBoolean("default-actionbar-enabled", true);
+        return true;
     }
 
     public void toggleActionBar(UUID uuid) {
         boolean current = isActionBarEnabled(uuid);
-        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO player_settings (uuid, actionbar_enabled) VALUES (?, ?) ON CONFLICT(uuid) DO UPDATE SET actionbar_enabled = ?")) {
+        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, actionbar_enabled, language) VALUES (?, ?, (SELECT language FROM player_settings WHERE uuid = ?))")) {
             ps.setString(1, uuid.toString());
             ps.setBoolean(2, !current);
-            ps.setBoolean(3, !current);
-            ps.executeUpdate();
-        } catch (SQLException e) { e.printStackTrace(); }
-    }
-
-    // --- Configurações de Confirmação ---
-    public boolean isConfirmEnabled(UUID uuid) {
-        try (PreparedStatement ps = connection.prepareStatement("SELECT confirm_enabled FROM player_settings WHERE uuid = ?")) {
-            ps.setString(1, uuid.toString());
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getBoolean("confirm_enabled");
-        } catch (SQLException e) { e.printStackTrace(); }
-        return true;
-    }
-
-    public void toggleConfirmation(UUID uuid) {
-        boolean current = isConfirmEnabled(uuid);
-        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO player_settings (uuid, confirm_enabled) VALUES (?, ?) ON CONFLICT(uuid) DO UPDATE SET confirm_enabled = ?")) {
-            ps.setString(1, uuid.toString());
-            ps.setBoolean(2, !current);
-            ps.setBoolean(3, !current);
+            ps.setString(3, uuid.toString());
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }

@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class InfinityManager {
+
     public long getAmount(UUID uuid, String materialName) {
         String query = "SELECT amount FROM player_filters WHERE uuid = ? AND material = ? AND filter_type = 'isf'";
         try (PreparedStatement ps = VirtualFilter.getInstance().getDbManager().getConnection().prepareStatement(query)) {
@@ -34,12 +35,19 @@ public class InfinityManager {
     public void withdrawPack(Player player, String materialName, int slot) {
         Material mat = Material.getMaterial(materialName);
         if (mat == null) return;
+
         long currentTotal = getAmount(player.getUniqueId(), materialName);
         if (currentTotal <= 0) return;
+
+        // Tenta pegar 64 ou o que sobrar
         int toWithdraw = (int) Math.min(currentTotal, mat.getMaxStackSize());
+
         ItemStack item = new ItemStack(mat, toWithdraw);
-        if (player.getInventory().addItem(item).isEmpty()) {
-            updateAmount(player.getUniqueId(), materialName, -toWithdraw);
+        if (!player.getInventory().addItem(item).isEmpty()) {
+            player.sendMessage("§cInventory full!");
+            return;
         }
+
+        updateAmount(player.getUniqueId(), materialName, -toWithdraw);
     }
 }

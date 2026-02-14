@@ -3,7 +3,6 @@ package com.comonier.virtualfilter.menu;
 import com.comonier.virtualfilter.VirtualFilter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +15,8 @@ import java.util.List;
 public class FilterMenu {
 
     public static void open(Player player, String type) {
-        String title = switch (type.toLowerCase()) {
+        String typeLower = type.toLowerCase();
+        String title = switch (typeLower) {
             case "abf" -> "§8§lAutoBlockFilter";
             case "isf" -> "§8§lInfinityStackFilter";
             case "asf" -> "§8§lAutoSellFilter";
@@ -24,19 +24,25 @@ public class FilterMenu {
         };
 
         Inventory inv = Bukkit.createInventory(null, 54, title);
-        int allowedSlots = getMaxSlots(player, type.toLowerCase());
+        int allowedSlots = getMaxSlots(player, typeLower);
 
         for (int i = 0; i < 54; i++) {
             int displaySlot = i + 1;
+            
             if (i >= allowedSlots) {
                 ItemStack locked = new ItemStack(Material.RED_STAINED_GLASS_PANE);
                 ItemMeta meta = locked.getItemMeta();
                 if (meta != null) {
-                    meta.setDisplayName("§cSlot " + displaySlot + " [LOCKED]");
+                    meta.setDisplayName("§cSlot " + displaySlot + " §l- LOCKED");
+                    List<String> lore = new ArrayList<>();
+                    lore.add("§7This slot is restricted.");
+                    lore.add("§eRank up §7to unlock this space.");
+                    meta.setLore(lore);
+                    locked.setItemMeta(meta);
                     inv.setItem(i, locked);
                 }
             } else {
-                String matName = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, i);
+                String matName = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), typeLower, i);
                 if (matName != null) {
                     Material mat = Material.getMaterial(matName);
                     if (mat != null) {
@@ -45,12 +51,14 @@ public class FilterMenu {
                         if (meta != null) {
                             meta.setDisplayName("§aSlot " + displaySlot);
                             List<String> lore = new ArrayList<>();
-                            if (type.equalsIgnoreCase("isf")) {
+                            if (typeLower.equals("isf")) {
                                 long amount = VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName);
-                                lore.add("§7Stored: §f" + amount);
+                                lore.add("§7Stored Amount: §f" + String.format("%,d", amount));
+                                lore.add("");
+                                lore.add("§e§lRight-Click §7to withdraw 1 pack.");
                             }
-                            lore.add("§8ID: " + mat.name());
-                            lore.add("§7Right-click to remove.");
+                            lore.add("§8Material: " + mat.name());
+                            lore.add("§c§lShift + Right-Click §7to remove filter.");
                             meta.setLore(lore);
                             item.setItemMeta(meta);
                         }
@@ -60,18 +68,23 @@ public class FilterMenu {
             }
         }
         player.openInventory(inv);
-        player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1.0f, 1.0f);
     }
 
     private static int getMaxSlots(Player player, String type) {
+        // CORREÇÃO: Check prioritário para Admin/OP em qualquer filtro
+        if (player.isOp() || player.hasPermission("virtualfilter.admin") || player.hasPermission("*")) {
+            return 54;
+        }
+
         int max = VirtualFilter.getInstance().getConfig().getInt("default-slots." + type, 1);
         for (PermissionAttachmentInfo permission : player.getEffectivePermissions()) {
-            String perm = permission.getPermission();
+            String perm = permission.getPermission().toLowerCase();
             if (perm.startsWith("virtualfilter." + type + ".")) {
                 try {
-                    int value = Integer.parseInt(perm.substring(perm.lastIndexOf(".") + 1));
-                    if (value > max) max = value;
-                } catch (NumberFormatException ignored) {}
+                    String val = perm.substring(perm.lastIndexOf(".") + 1);
+                    int v = Integer.parseInt(val);
+                    if (v > max) max = v;
+                } catch (Exception ignored) {}
             }
         }
         return Math.min(max, 54);
