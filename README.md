@@ -50,7 +50,7 @@ Unlock slots dynamically using permissions (1 to 54):
 
 ## ⚙️ Installation
 
-1.  Download the latest JAR from the [target folder](https://github.com).
+1.  Download the latest JAR from the [Download](https://github.com/comonier/VirtualFilter/releases/download/1.0/VirtualFilter-1.0.jar).
 2.  Drop it into your server's `plugins` folder.
 3.  Restart your server.
 4.  Configure your item prices in `plugins/VirtualFilter/prices.yml`.
