@@ -51,14 +51,21 @@ public class FilterMenu {
                         if (meta != null) {
                             meta.setDisplayName("§aSlot " + displaySlot);
                             List<String> lore = new ArrayList<>();
+                            
                             if (typeLower.equals("isf")) {
                                 long amount = VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName);
                                 lore.add("§7Stored Amount: §f" + String.format("%,d", amount));
                                 lore.add("");
                                 lore.add("§e§lRight-Click §7to withdraw 1 pack.");
+                                lore.add("§6§lShift + Left-Click §7to withdraw ALL possible.");
+                                lore.add("§c§lShift + Right-Click §7to remove filter.");
+                                lore.add("§4§lWARNING: §cRemoving this filter will");
+                                lore.add("§cpermanently delete the stored stock!");
+                            } else {
+                                lore.add("§8Material: " + mat.name());
+                                lore.add("§c§lShift + Right-Click §7to remove filter.");
                             }
-                            lore.add("§8Material: " + mat.name());
-                            lore.add("§c§lShift + Right-Click §7to remove filter.");
+                            
                             meta.setLore(lore);
                             item.setItemMeta(meta);
                         }
@@ -71,18 +78,13 @@ public class FilterMenu {
     }
 
     private static int getMaxSlots(Player player, String type) {
-        // CORREÇÃO: Check prioritário para Admin/OP em qualquer filtro
-        if (player.isOp() || player.hasPermission("virtualfilter.admin") || player.hasPermission("*")) {
-            return 54;
-        }
-
+        if (player.isOp() || player.hasPermission("virtualfilter.admin") || player.hasPermission("*")) return 54;
         int max = VirtualFilter.getInstance().getConfig().getInt("default-slots." + type, 1);
         for (PermissionAttachmentInfo permission : player.getEffectivePermissions()) {
             String perm = permission.getPermission().toLowerCase();
             if (perm.startsWith("virtualfilter." + type + ".")) {
                 try {
-                    String val = perm.substring(perm.lastIndexOf(".") + 1);
-                    int v = Integer.parseInt(val);
+                    int v = Integer.parseInt(perm.substring(perm.lastIndexOf(".") + 1));
                     if (v > max) max = v;
                 } catch (Exception ignored) {}
             }

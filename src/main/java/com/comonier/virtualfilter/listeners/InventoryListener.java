@@ -24,15 +24,51 @@ public class InventoryListener implements Listener {
         String title = event.getView().getTitle();
         if (!title.contains("Filter")) return;
 
+        // Cancela o padrão para evitar roubo de itens técnicos do menu
         event.setCancelled(true);
+        
         String typeCode = title.contains("AutoBlock") ? "abf" : (title.contains("InfinityStack") ? "isf" : "asf");
+        boolean isISF = typeCode.equals("isf");
 
         int slot = event.getSlot();
+        if (slot < 0 || slot >= 54) return;
+
         ItemStack cursorItem = event.getCursor();
         ItemStack clickedItem = event.getCurrentItem();
 
-        // --- 1. MOVER COM O MOUSE (CLIQUE ESQUERDO) ---
-        if (event.getClick() == ClickType.LEFT && slot >= 0 && slot < 54) {
+        // --- 1. QUICK-ADD (SHIFT + ESQUERDO no inv de baixo) ---
+        if (event.getClickedInventory() == player.getInventory()) {
+            if (event.getClick() == ClickType.SHIFT_LEFT) {
+                ItemStack toAdd = event.getCurrentItem();
+                if (toAdd != null && toAdd.getType() != Material.AIR && toAdd.getType().getMaxStackSize() > 1) {
+                    handleCreation(player, typeCode, toAdd.getType(), -1);
+                    FilterMenu.open(player, typeCode);
+                }
+            }
+            return;
+        }
+
+        // --- 2. CLIQUE NO MENU (PARTE DE CIMA) ---
+        
+        // ESQUERDO: Adicionar, Substituir ou SAQUE MASSIVO (ISF)
+        if (event.getClick() == ClickType.LEFT || event.getClick() == ClickType.SHIFT_LEFT) {
+            
+            // CASO A: Saque Massivo (Shift + Clique Esquerdo em item existente no ISF)
+            if (event.getClick() == ClickType.SHIFT_LEFT && isISF && isFilterItem(clickedItem)) {
+                String matName = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), typeCode, slot);
+                if (matName != null) {
+                    VirtualFilter.getInstance().getInfinityManager().withdrawMassive(player, matName);
+                    // Se o estoque zerar após o saque massivo, remove o filtro
+                    if (VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName) <= 0) {
+                        executeDelete(player, typeCode, slot);
+                    }
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
+                    FilterMenu.open(player, typeCode);
+                }
+                return;
+            }
+
+            // CASO B: Adicionar/Substituir com item no mouse (Clique Esquerdo Normal)
             if (cursorItem != null && cursorItem.getType() != Material.AIR) {
                 if (cursorItem.getType().getMaxStackSize() <= 1) return;
                 
@@ -42,49 +78,46 @@ public class InventoryListener implements Listener {
                     return;
                 }
 
+                // Devolve o item antigo limpo se estiver substituindo
+                if (isFilterItem(clickedItem)) {
+                    player.getInventory().addItem(new ItemStack(clickedItem.getType(), 1));
+                }
+
                 handleCreation(player, typeCode, cursorItem.getType(), slot);
-                player.setItemOnCursor(null); 
+                player.setItemOnCursor(null); // Consome o item do mouse
                 FilterMenu.open(player, typeCode);
                 return;
             }
         }
 
-        // --- 2. QUICK-ADD (SHIFT + ESQUERDO) ---
-        if (event.getClickedInventory() == player.getInventory() && event.getClick() == ClickType.SHIFT_LEFT) {
-            ItemStack toAdd = event.getCurrentItem();
-            if (toAdd != null && toAdd.getType() != Material.AIR && toAdd.getType().getMaxStackSize() > 1) {
-                handleCreation(player, typeCode, toAdd.getType(), -1);
+        // DIREITO: Saque Simples (1 Pack no ISF)
+        if (event.getClick() == ClickType.RIGHT && isISF && isFilterItem(clickedItem)) {
+            String matName = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), typeCode, slot);
+            if (matName != null) {
+                VirtualFilter.getInstance().getInfinityManager().withdrawPack(player, matName, slot);
+                if (VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName) <= 0) {
+                    executeDelete(player, typeCode, slot);
+                }
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
                 FilterMenu.open(player, typeCode);
             }
             return;
         }
 
-        // --- 3. SAQUE ISF (DIREITO) ---
-        if (event.getClick() == ClickType.RIGHT && typeCode.equals("isf") && slot >= 0) {
-            if (clickedItem != null && !clickedItem.getType().name().contains("GLASS_PANE")) {
-                String matName = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), typeCode, slot);
-                if (matName != null) {
-                    VirtualFilter.getInstance().getInfinityManager().withdrawPack(player, matName, slot);
-                    if (VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName) <= 0) {
-                        executeDelete(player, typeCode, slot);
-                    }
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
-                    FilterMenu.open(player, typeCode);
-                }
-            }
-            return;
-        }
-
-        // --- 4. DELETAR (SHIFT + DIREITO) ---
-        if (event.getClick() == ClickType.SHIFT_RIGHT && clickedItem != null && !clickedItem.getType().name().contains("GLASS_PANE")) {
+        // SHIFT + DIREITO: Deletar Filtro (Universal)
+        if (event.getClick() == ClickType.SHIFT_RIGHT && isFilterItem(clickedItem)) {
             executeDelete(player, typeCode, slot);
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
             FilterMenu.open(player, typeCode);
         }
     }
 
+    private boolean isFilterItem(ItemStack item) {
+        return item != null && item.getType() != Material.AIR && !item.getType().name().contains("GLASS_PANE");
+    }
+
     private void handleCreation(Player player, String type, Material mat, int specificSlot) {
-        // Verifica se o jogador já possui esse filtro em qualquer slot desse menu
+        // Lógica de auto-mesclagem
         int existingSlot = -1;
         for (int i = 0; i < 54; i++) {
             String m = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, i);
@@ -94,33 +127,24 @@ public class InventoryListener implements Listener {
             }
         }
 
-        // Se já existe e é ISF, vamos apenas somar ao estoque
         if (existingSlot != -1) {
             if (type.equals("isf")) {
                 long toAdd = 0;
-                for (ItemStack invItem : player.getInventory().getContents()) {
+                for (ItemStack invItem : player.getInventory().getStorageContents()) {
                     if (invItem != null && invItem.getType() == mat) {
                         toAdd += invItem.getAmount();
                         invItem.setAmount(0);
                     }
                 }
-                if (player.getItemOnCursor() != null && player.getItemOnCursor().getType() == mat) {
-                    toAdd += player.getItemOnCursor().getAmount();
-                }
                 VirtualFilter.getInstance().getDbManager().addAmount(player.getUniqueId(), mat.name(), (int) toAdd);
-                player.sendMessage("§aItems merged into existing " + mat.name() + " filter.");
                 player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
-            } else {
-                player.sendMessage("§cYou already have a filter for " + mat.name() + "!");
             }
             return;
         }
 
-        // Se não existe, cria um novo no slot desejado ou no próximo livre
         int targetSlot = specificSlot;
-        if (targetSlot == -1 || (VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, targetSlot) != null)) {
+        if (targetSlot == -1) {
             int allowed = getMaxSlots(player, type);
-            targetSlot = -1; // Reset para busca
             for (int i = 0; i < allowed; i++) {
                 if (VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, i) == null) {
                     targetSlot = i; break;
@@ -131,20 +155,15 @@ public class InventoryListener implements Listener {
         if (targetSlot != -1) {
             long total = 0;
             if (type.equals("isf")) {
-                for (ItemStack invItem : player.getInventory().getContents()) {
+                for (ItemStack invItem : player.getInventory().getStorageContents()) {
                     if (invItem != null && invItem.getType() == mat) {
                         total += invItem.getAmount();
                         invItem.setAmount(0);
                     }
                 }
-                if (player.getItemOnCursor() != null && player.getItemOnCursor().getType() == mat) {
-                    total += player.getItemOnCursor().getAmount();
-                }
             }
             saveItem(player, type, targetSlot, mat.name(), total);
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
-        } else {
-            player.sendMessage("§cNo slots available!");
         }
     }
 
