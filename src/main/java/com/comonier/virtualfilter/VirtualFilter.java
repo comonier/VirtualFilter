@@ -22,18 +22,23 @@ public class VirtualFilter extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        
+        // 1. Configurações e Preços
         saveDefaultConfig();
         loadMessages();
         ShopGUIHook.loadPrices();
 
+        // 2. Integração com Economia (Vault)
         if (!setupEconomy()) {
-            getLogger().severe("Vault not found! AutoSell will not pay players.");
+            getLogger().severe("Vault not found! AutoSell feature will not pay players.");
         }
 
+        // 3. Banco de Dados e Gerenciadores
         this.dbManager = new DatabaseManager();
         this.dbManager.setupDatabase();
         this.infinityManager = new InfinityManager();
 
+        // 4. Registro de Comandos
         FilterCommands cmd = new FilterCommands();
         getCommand("abf").setExecutor(cmd);
         getCommand("isf").setExecutor(cmd);
@@ -45,11 +50,14 @@ public class VirtualFilter extends JavaPlugin {
         getCommand("vflang").setExecutor(cmd);
         getCommand("vfhelp").setExecutor(cmd);
         getCommand("vfreload").setExecutor(cmd);
+        getCommand("afh").setExecutor(cmd); // Novo comando integrado
 
+        // 5. Registro de Listeners
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
         getServer().getPluginManager().registerEvents(new FilterProcessor(), this);
+        getServer().getPluginManager().registerEvents(new AutoFillListener(), this); // Novo listener integrado
 
-        getLogger().info("VirtualFilter v1.2 enabled successfully!");
+        getLogger().info("VirtualFilter v1.1 enabled successfully (AutoFillHand included)!");
     }
 
     private void loadMessages() {
@@ -75,8 +83,15 @@ public class VirtualFilter extends JavaPlugin {
         reloadConfig();
         loadMessages();
         ShopGUIHook.loadPrices();
+        getLogger().info("Configurations and prices reloaded.");
     }
 
+    @Override
+    public void onDisable() {
+        getLogger().info("VirtualFilter disabled.");
+    }
+
+    // --- Getters Públicos ---
     public static VirtualFilter getInstance() { return instance; }
     public static Economy getEconomy() { return econ; }
     public DatabaseManager getDbManager() { return dbManager; }

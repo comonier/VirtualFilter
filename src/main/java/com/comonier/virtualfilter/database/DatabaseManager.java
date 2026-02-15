@@ -14,10 +14,10 @@ public class DatabaseManager {
             if (!folder.exists()) folder.mkdirs();
             connection = DriverManager.getConnection("jdbc:sqlite:" + new File(folder, "storage.db"));
             try (Statement s = connection.createStatement()) {
-                // Tabela de filtros com Chave Primária Composta (Corrige o erro de INSERT)
+                // Tabela de filtros com Chave Primária Composta
                 s.execute("CREATE TABLE IF NOT EXISTS player_filters (uuid TEXT, filter_type TEXT, slot_id INTEGER, material TEXT, amount BIGINT DEFAULT 0, PRIMARY KEY (uuid, filter_type, slot_id))");
-                // Tabela de configurações
-                s.execute("CREATE TABLE IF NOT EXISTS player_settings (uuid TEXT PRIMARY KEY, actionbar_enabled BOOLEAN DEFAULT 1, language TEXT DEFAULT 'en')");
+                // Tabela de configurações atualizada com autofill_enabled
+                s.execute("CREATE TABLE IF NOT EXISTS player_settings (uuid TEXT PRIMARY KEY, actionbar_enabled BOOLEAN DEFAULT 1, language TEXT DEFAULT 'en', autofill_enabled BOOLEAN DEFAULT 1)");
             }
         } catch (SQLException e) { e.printStackTrace(); }
     }
@@ -35,11 +35,11 @@ public class DatabaseManager {
     }
 
     public void setPlayerLanguage(UUID uuid, String lang) {
-        // INSERT OR REPLACE: Funciona em qualquer SQLite e resolve o erro "near ON"
-        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, language, actionbar_enabled) VALUES (?, ?, (SELECT actionbar_enabled FROM player_settings WHERE uuid = ?))")) {
+        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, language, actionbar_enabled, autofill_enabled) VALUES (?, ?, (SELECT actionbar_enabled FROM player_settings WHERE uuid = ?), (SELECT autofill_enabled FROM player_settings WHERE uuid = ?))")) {
             ps.setString(1, uuid.toString());
             ps.setString(2, lang);
             ps.setString(3, uuid.toString());
+            ps.setString(4, uuid.toString());
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }
@@ -56,10 +56,32 @@ public class DatabaseManager {
 
     public void toggleActionBar(UUID uuid) {
         boolean current = isActionBarEnabled(uuid);
-        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, actionbar_enabled, language) VALUES (?, ?, (SELECT language FROM player_settings WHERE uuid = ?))")) {
+        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, actionbar_enabled, language, autofill_enabled) VALUES (?, ?, (SELECT language FROM player_settings WHERE uuid = ?), (SELECT autofill_enabled FROM player_settings WHERE uuid = ?))")) {
             ps.setString(1, uuid.toString());
             ps.setBoolean(2, !current);
             ps.setString(3, uuid.toString());
+            ps.setString(4, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    // --- Configurações de AutoFillHand (AFH) ---
+    public boolean isAutoFillEnabled(UUID uuid) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT autofill_enabled FROM player_settings WHERE uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getBoolean("autofill_enabled");
+        } catch (SQLException e) { e.printStackTrace(); }
+        return true;
+    }
+
+    public void toggleAutoFill(UUID uuid) {
+        boolean current = isAutoFillEnabled(uuid);
+        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, autofill_enabled, language, actionbar_enabled) VALUES (?, ?, (SELECT language FROM player_settings WHERE uuid = ?), (SELECT actionbar_enabled FROM player_settings WHERE uuid = ?))")) {
+            ps.setString(1, uuid.toString());
+            ps.setBoolean(2, !current);
+            ps.setString(3, uuid.toString());
+            ps.setString(4, uuid.toString());
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }

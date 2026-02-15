@@ -36,12 +36,22 @@ public class FilterCommands implements CommandExecutor {
             return true;
         }
 
+        if (cmd.equals("afh")) {
+            VirtualFilter.getInstance().getDbManager().toggleAutoFill(player.getUniqueId());
+            boolean newState = VirtualFilter.getInstance().getDbManager().isAutoFillEnabled(player.getUniqueId());
+            String status = newState ? "§aENABLED" : "§cDISABLED";
+            player.sendMessage("§6[VirtualFilter] §7AutoFillHand is now " + status);
+            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
+            return true;
+        }
+
         if (cmd.equals("vflang")) {
             if (args.length == 0) {
                 player.sendMessage("§eUsage: /vflang <en|pt>");
                 return true;
             }
-            String lang = args[0].toLowerCase();
+            // CORREÇÃO: Acessando o primeiro argumento da String individualmente
+            String lang = args[0].toLowerCase(); 
             if (lang.equals("en") || lang.equals("pt")) {
                 VirtualFilter.getInstance().getDbManager().setPlayerLanguage(player.getUniqueId(), lang);
                 player.sendMessage(lang.equals("en") ? "§aLanguage set to English!" : "§aIdioma definido para Português!");
@@ -77,7 +87,6 @@ public class FilterCommands implements CommandExecutor {
 
             Material mat = item.getType();
             
-            // --- NOVA LÓGICA DE AUTO-MESCLAGEM VIA COMANDO ---
             int existingSlot = -1;
             for (int i = 0; i < 54; i++) {
                 String m = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, i);
@@ -105,7 +114,6 @@ public class FilterCommands implements CommandExecutor {
                 return true;
             }
 
-            // --- LÓGICA DE CRIAÇÃO (SE NÃO EXISTIR) ---
             int allowed = getMaxSlots(player, type);
             int targetSlot = -1;
             for (int i = 0; i < allowed; i++) {
@@ -144,6 +152,7 @@ public class FilterCommands implements CommandExecutor {
             p.sendMessage("§e/abf, /isf, /asf §7- Abre os menus de filtro.");
             p.sendMessage("§e/add<tipo> §7- Adiciona/Mescla item da mão ao filtro.");
             p.sendMessage("§e/vfat §7- Ativa/Desativa avisos na Action Bar.");
+            p.sendMessage("§e/afh §7- Ativa/Desativa reposição automática da mão.");
             p.sendMessage("§e/vflang <en|pt> §7- Altera seu idioma pessoal.");
             p.sendMessage("§e/vfhelp §7- Mostra este menu de ajuda.");
         } else {
@@ -151,6 +160,7 @@ public class FilterCommands implements CommandExecutor {
             p.sendMessage("§e/abf, /isf, /asf §7- Open filter menus.");
             p.sendMessage("§e/add<type> §7- Add/Merge held item to filter.");
             p.sendMessage("§e/vfat §7- Toggle Action Bar notifications.");
+            p.sendMessage("§e/afh §7- Toggle automatic hand refill (AutoFillHand).");
             p.sendMessage("§e/vflang <en|pt> §7- Change your personal language.");
             p.sendMessage("§e/vfhelp §7- Show this help menu.");
         }

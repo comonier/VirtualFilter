@@ -18,10 +18,13 @@ public class ShopGUIHook {
 
     public static double getItemPrice(Player player, ItemStack item) {
         String material = item.getType().name();
-        // Se não estiver no arquivo, retorna 1.0 como padrão
+        
+        // Se o item NÃO estiver configurado no prices.yml
         if (!prices.contains(material)) {
-            return 1.0;
+            // Alterado de 1.0 para 0.1 para evitar que itens lixo valham mais que minerios
+            return 0.1;
         }
+        
         return prices.getDouble(material);
     }
 }

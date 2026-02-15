@@ -1,5 +1,5 @@
 name: VirtualFilter
-version: 1.1
+version: 1.2
 main: com.comonier.virtualfilter.VirtualFilter
 api-version: 1.21
 author: comonier
@@ -27,6 +27,8 @@ commands:
   vfreload:
     description: Reloads plugin configurations and prices.
     permission: virtualfilter.admin
+  afh:
+    description: Toggle the AutoFillHand feature.
 
 permissions:
   virtualfilter.use:
