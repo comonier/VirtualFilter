@@ -6,30 +6,39 @@
 
 ---
 
-## 🚀 Key Features
+## 🚀 Version 1.2 Highlights
 
-*   **🚫 AutoBlockFilter (ABF):** Automatically prevents unwanted items from entering the player's inventory.
+*   **🛠️ AutoFillHand (AFH):** Never stop building or mining! Automatically replenishes identical items in your hand when a stack runs out or a tool breaks (supports non-enchanted items only). Toggle it via `/afh`.
+*   **📥 Massive Withdraw:** In the **ISF** menu, use `Shift + Left Click` on an item to instantly fill your inventory with the stored stock.
+*   **⚖️ Smart Hierarchy:** Automatic priority system: **Sell (ASF) > Storage (ISF) > Block (ABF)**.
+
+---
+
+## 💎 Key Features
+
+*   **🚫 AutoBlockFilter (ABF):** Automatically prevents unwanted items from entering your inventory.
 *   **📦 InfinityStackFilter (ISF):** Stores items in a virtual infinite warehouse.
-    *   **Auto-Merge:** If you add an item already in your filter, it automatically merges the stock instead of creating a duplicate slot.
-    *   **Inventory Suck:** Instantly pulls all matching items from your inventory into the storage upon filter creation.
-*   **💰 AutoSellFilter (ASF):** Automatically sells collected items at custom prices defined in `prices.yml`, with direct deposits via **Vault**.
+    *   **Auto-Merge:** Automatically merges new items into existing stock.
+    *   **Inventory Suck:** Instantly pulls all matching items from your inventory into the filter upon creation.
+*   **💰 AutoSellFilter (ASF):** Sells items automatically with configurable prices in `prices.yml` via **Vault**.
 *   **🎮 Modern UX:** 
-    *   **Quick-Add:** `Shift + Left Click` on any item in your inventory to add it instantly.
-    *   **Drag & Drop:** Replace or add filters by simply dropping a new item over the menu slots.
-    *   **Action Bar Notifications:** Real-time sale and storage updates (toggle via `/vfat`).
-*   **🌍 Multi-Language:** Support for **English** and **Portuguese**. Players choose via `/vflang`.
-*   **🛡️ Safety First:** Blocks non-stackable items (tools, armor) to prevent accidental loss.
+    *   **Quick-Add:** `Shift + Left Click` in your inventory to add items instantly to a filter.
+    *   **Drag & Drop:** Replace filters by dragging items within the menu.
+    *   **Action Bar:** Real-time notifications (toggle via `/vfat`).
+*   **🌍 Multi-Language:** Native support for **English** and **Portuguese** (`/vflang`).
 
 ---
 
 ## 🛠 Commands & Permissions
+
 | Command | Description | Permission |
 | :--- | :--- | :--- |
 | `/abf`, `/isf`, `/asf` | Opens the respective filter menus | `virtualfilter.use` |
-| `/add<type>` | Adds/Merges held item to filter (e.g., `/addisf`) | `virtualfilter.use` |
-| `/vfhelp` | Shows the dynamic help menu | `virtualfilter.use` |
-| `/vflang` | Changes personal language (`en` / `pt`) | `virtualfilter.use` |
+| `/afh` | Toggles automatic hand refill | `virtualfilter.use` |
+| `/add<type>` | Adds/Merges held item to a filter | `virtualfilter.use` |
 | `/vfat` | Toggles Action Bar notifications | `virtualfilter.use` |
+| `/vflang <en/pt>` | Changes your personal language | `virtualfilter.use` |
+| `/vfhelp` | Shows the dynamic help menu | `virtualfilter.use` |
 | `/vfreload` | Reloads configurations and prices | `virtualfilter.admin` |
 
 ### 🔑 Slot Management
