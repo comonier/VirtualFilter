@@ -6,26 +6,36 @@
 
 ---
 
+## 💎 VirtualFilter v1.3
+
+**Professional Independent Virtual Filtering System**
+An advanced item management system designed for high-performance Minecraft servers (1.21.1+).
+
+---
+
+### ⚠️ 🛑 **IMPORTANT: DATABASE BACKUP REQUIRED** 🛑 ⚠️
+<p>It is highly recommended to perform a full backup of your <b>storage.db</b> file before starting the server with this new version. This update performs a database schema migration to include the new AutoLoot settings.</p>
+
 ## 🚀 Version 1.2 Highlights
 
-*   **🛠️ AutoFillHand (AFH):** Never stop building or mining! Automatically replenishes identical items in your hand when a stack runs out or a tool breaks (supports non-enchanted items only). Toggle it via `/afh`.
-*   **📥 Massive Withdraw:** In the **ISF** menu, use `Shift + Left Click` on an item to instantly fill your inventory with the stored stock.
-*   **⚖️ Smart Hierarchy:** Automatic priority system: **Sell (ASF) > Storage (ISF) > Block (ABF)**.
+   **🛠️ AutoFillHand (AFH):** Never stop building or mining! Automatically replenishes identical items in your hand when a stack runs out or a tool breaks (supports non-enchanted items only). Toggle it via `/afh`.
+   **📥 Massive Withdraw:** In the **ISF** menu, use `Shift + Left Click` on an item to instantly fill your inventory with the stored stock.
+   **⚖️ Smart Hierarchy:** Automatic priority system: **Sell (ASF) > Storage (ISF) > Block (ABF)**.
 
 ---
 
 ## 💎 Key Features
 
-*   **🚫 AutoBlockFilter (ABF):** Automatically prevents unwanted items from entering your inventory.
-*   **📦 InfinityStackFilter (ISF):** Stores items in a virtual infinite warehouse.
-    *   **Auto-Merge:** Automatically merges new items into existing stock.
-    *   **Inventory Suck:** Instantly pulls all matching items from your inventory into the filter upon creation.
-*   **💰 AutoSellFilter (ASF):** Sells items automatically with configurable prices in `prices.yml` via **Vault**.
-*   **🎮 Modern UX:** 
-    *   **Quick-Add:** `Shift + Left Click` in your inventory to add items instantly to a filter.
-    *   **Drag & Drop:** Replace filters by dragging items within the menu.
-    *   **Action Bar:** Real-time notifications (toggle via `/vfat`).
-*   **🌍 Multi-Language:** Native support for **English** and **Portuguese** (`/vflang`).
+   **🚫 AutoBlockFilter (ABF):** Automatically prevents unwanted items from entering your inventory.
+   **📦 InfinityStackFilter (ISF):** Stores items in a virtual infinite warehouse.
+   **Auto-Merge:** Automatically merges new items into existing stock.
+   **Inventory Suck:** Instantly pulls all matching items from your inventory into the filter upon creation.
+   **💰 AutoSellFilter (ASF):** Sells items automatically with configurable prices in `prices.yml` via **Vault**.
+   **🎮 Modern UX:** 
+   **Quick-Add:** `Shift + Left Click` in your inventory to add items instantly to a filter.
+   **Drag & Drop:** Replace filters by dragging items within the menu.
+   **Action Bar:** Real-time notifications (toggle via `/vfat`).
+   **🌍 Multi-Language:** Native support for **English** and **Portuguese** (`/vflang`).
 
 ---
 
@@ -33,6 +43,7 @@
 
 | Command | Description | Permission |
 | :--- | :--- | :--- |
+| `/al` | Toggle Auto Loot | `virtualfilter.use` |
 | `/abf`, `/isf`, `/asf` | Opens the respective filter menus | `virtualfilter.use` |
 | `/afh` | Toggles automatic hand refill | `virtualfilter.use` |
 | `/add<type>` | Adds/Merges held item to a filter | `virtualfilter.use` |
