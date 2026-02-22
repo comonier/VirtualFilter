@@ -4,6 +4,16 @@
 
 **VirtualFilter** is a high-performance, standalone Minecraft plugin designed for Factions and Survival servers. It allows players to manage their loot efficiently through three specialized virtual systems: **Auto-Block**, **Infinity-Stack**, and **Auto-Sell**.
 
+
+
+**##🚀 NEW IN VERSION (1.3.3)**
+Major stability and automation improvements for the ultimate user experience.
+
+🏗️ **Infinite Build** (AFH + ISF): AutoFillHand now automatically pulls 64 units directly from your InfinityStack (ISF) storage when your inventory runs out.<br>
+🔗 **New Aliases**: You can now use /vf or /vfilter as shortcuts for the help menu.<br>
+🐛 **Command Fix**: Fixed a critical "Unhandled Exception" crash when using /vfhelp for new players.<br>
+📡 **Database UPSERT**: Rebuilt SQL logic to ensure all player settings (Language, AFH, AL) are correctly initialized upon login.
+
 ---
 
 ## 🚀 Auto Loot: Critical Updates (v1.3.2)
