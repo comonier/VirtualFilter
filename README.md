@@ -8,11 +8,6 @@
 
 ## 💎 VirtualFilter v1.3
 
-**Professional Independent Virtual Filtering System**
-An advanced item management system designed for high-performance Minecraft servers (1.21.1+).
-
----
-
 ### ⚠️ 🛑 **IMPORTANT: DATABASE BACKUP REQUIRED** 🛑 ⚠️
 <p>It is highly recommended to perform a full backup of your <b>storage.db</b> file before starting the server with this new version. This update performs a database schema migration to include the new AutoLoot settings.</p>
 
