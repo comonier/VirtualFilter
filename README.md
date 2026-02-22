@@ -26,17 +26,17 @@
 
 ## 💎 Key Features
 
-⚡ AutoLoot (v1.3): Automatically collects drops directly into your inventory or filters when breaking blocks.
-🚫 AutoBlockFilter (ABF): Automatically prevents unwanted items from entering your inventory.
-📦 InfinityStackFilter (ISF): Stores items in a virtual infinite warehouse.
-🔄 Auto-Merge: Automatically merges new items into existing stock.
-🧲 Inventory Suck: Instantly pulls all matching items from your inventory into the filter upon creation.
-💰 AutoSellFilter (ASF): Sells items automatically with configurable prices in prices.yml via Vault.
-🎮 Modern UX: Enhanced user experience with intuitive menus.
-🖱️ Quick-Add: Shift + Left Click in your inventory to add items instantly to a filter.
-♻️ Drag & Drop: Replace filters by dragging items within the menu.
-🔔 Action Bar: Real-time notifications (toggle via /vfat).
-🌍 Multi-Language: Native support for English and Portuguese (/vflang).
+⚡ **AutoLoot (v1.3):** Automatically collects drops directly into your inventory or filters when breaking blocks. <br>
+🚫 **AutoBlockFilter (ABF):** Automatically prevents unwanted items from entering your inventory. <br>
+📦 **InfinityStackFilter (ISF):** Stores items in a virtual infinite warehouse. <br>
+🔄 **Auto-Merge:** Automatically merges new items into existing stock. <br>
+🧲 **Inventory Suck:** Instantly pulls all matching items from your inventory into the filter upon creation. <br>
+💰 **AutoSellFilter (ASF):** Sells items automatically with configurable prices in prices.yml via Vault. <br>
+🎮 **Modern UX:** Enhanced user experience with intuitive menus. <br>
+🖱️ **Quick-Add:** Shift + Left Click in your inventory to add items instantly to a filter. <br>
+♻️ **Drag & Drop:** Replace filters by dragging items within the menu. <br>
+🔔 **Action Bar:** Real-time notifications (toggle via /vfat). <br>
+🌍 **Multi-Language:** Native support for English and Portuguese (/vflang).
 
 
 ---
