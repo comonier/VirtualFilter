@@ -6,7 +6,7 @@
 
 
 
-**##🚀 NEW IN VERSION (1.3.3)**
+## 🚀 Integation AFH + ISF (v1.3.3)
 Major stability and automation improvements for the ultimate user experience.
 
 🏗️ **Infinite Build** (AFH + ISF): AutoFillHand now automatically pulls 64 units directly from your InfinityStack (ISF) storage when your inventory runs out.<br>
