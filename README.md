@@ -11,6 +11,11 @@
 ### ⚠️ 🛑 **IMPORTANT: DATABASE BACKUP REQUIRED** 🛑 ⚠️
 <p>It is highly recommended to perform a full backup of your <b>storage.db</b> file before starting the server with this new version. This update performs a database schema migration to include the new AutoLoot settings.</p>
 
+### 💡 ℹ️ **TROUBLESHOOTING: COMMAND /AL** ℹ️ 💡
+<p>If the new <b>/al</b> command displays a "Message not found" error, simply delete your current <b>messages.yml</b> file and run <b>/vfreload</b>. This will force the plugin to generate the new message keys correctly.</p>
+
+---
+
 ## 🚀 Version 1.2 Highlights
 
    **🛠️ AutoFillHand (AFH):** Never stop building or mining! Automatically replenishes identical items in your hand when a stack runs out or a tool breaks (supports non-enchanted items only). Toggle it via `/afh`.
@@ -21,16 +26,18 @@
 
 ## 💎 Key Features
 
-   **🚫 AutoBlockFilter (ABF):** Automatically prevents unwanted items from entering your inventory.
-   **📦 InfinityStackFilter (ISF):** Stores items in a virtual infinite warehouse.
-   **Auto-Merge:** Automatically merges new items into existing stock.
-   **Inventory Suck:** Instantly pulls all matching items from your inventory into the filter upon creation.
-   **💰 AutoSellFilter (ASF):** Sells items automatically with configurable prices in `prices.yml` via **Vault**.
-   **🎮 Modern UX:** 
-   **Quick-Add:** `Shift + Left Click` in your inventory to add items instantly to a filter.
-   **Drag & Drop:** Replace filters by dragging items within the menu.
-   **Action Bar:** Real-time notifications (toggle via `/vfat`).
-   **🌍 Multi-Language:** Native support for **English** and **Portuguese** (`/vflang`).
+⚡ AutoLoot (v1.3): Automatically collects drops directly into your inventory or filters when breaking blocks.
+🚫 AutoBlockFilter (ABF): Automatically prevents unwanted items from entering your inventory.
+📦 InfinityStackFilter (ISF): Stores items in a virtual infinite warehouse.
+🔄 Auto-Merge: Automatically merges new items into existing stock.
+🧲 Inventory Suck: Instantly pulls all matching items from your inventory into the filter upon creation.
+💰 AutoSellFilter (ASF): Sells items automatically with configurable prices in prices.yml via Vault.
+🎮 Modern UX: Enhanced user experience with intuitive menus.
+🖱️ Quick-Add: Shift + Left Click in your inventory to add items instantly to a filter.
+♻️ Drag & Drop: Replace filters by dragging items within the menu.
+🔔 Action Bar: Real-time notifications (toggle via /vfat).
+🌍 Multi-Language: Native support for English and Portuguese (/vflang).
+
 
 ---
 
@@ -46,6 +53,8 @@
 | `/vflang <en/pt>` | Changes your personal language | `virtualfilter.use` |
 | `/vfhelp` | Shows the dynamic help menu | `virtualfilter.use` |
 | `/vfreload` | Reloads configurations and prices | `virtualfilter.admin` |
+
+---
 
 ### 🔑 Slot Management
 Unlock slots dynamically using permissions (1 to 54):
