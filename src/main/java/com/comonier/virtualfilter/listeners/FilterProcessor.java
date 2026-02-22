@@ -15,13 +15,21 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
-
+import org.bukkit.metadata.FixedMetadataValue;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class FilterProcessor implements Listener {
 
-    // 1. Coleta Manual (Caso o item já estivesse no chão)
+    private final HashMap<UUID, Long> soundCooldowns = new HashMap<>();
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerDrop(PlayerDropItemEvent event) {
+        event.getItemDrop().setMetadata("drop_time", new FixedMetadataValue(VirtualFilter.getInstance(), System.currentTimeMillis()));
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPickup(EntityPickupItemEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
@@ -29,95 +37,92 @@ public class FilterProcessor implements Listener {
         if (processItem(player, item)) {
             event.getItem().remove();
             event.setCancelled(true);
+            // Pickup manual no chão sempre toca som (opcional, pode remover se preferir silêncio aqui)
+            playTeleportSound(player);
         }
     }
 
-    // 2. AutoLoot de Bloco (Apenas remove o drop físico do bloco quebrado)
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         if (VirtualFilter.getInstance().getDbManager().isAutoLootEnabled(player.getUniqueId())) {
-            // Permitimos que o bloco quebre, mas o ItemSpawnEvent cuidará do recolhimento
             event.setDropItems(false); 
-            
-            // Forçamos o drop via código para garantir que o ItemSpawnEvent seja disparado 
-            // e capturado pelo nosso ímã, respeitando Fortuna/SilkTouch
             event.getBlock().getDrops(player.getInventory().getItemInMainHand(), player).forEach(drop -> {
-                event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), drop);
+                // Para o bloco quebrado diretamente, o som é DESATIVADO (false)
+                deliverItem(player, drop, event.getBlock().getLocation(), false);
             });
         }
     }
 
-    // 3. O ÍMÃ UNIVERSAL (Captura TUDO: Drops normais, mcMMO, Slimefun, Explosões)
     @EventHandler(priority = EventPriority.LOWEST)
     public void onItemSpawn(ItemSpawnEvent event) {
         Item itemEntity = event.getEntity();
-        
-        // Raio de 10 blocos (Aumente se quiser um ímã mais potente)
-        for (Entity entity : itemEntity.getNearbyEntities(10, 10, 10)) {
+        if (itemEntity.hasMetadata("drop_time")) {
+            long dropTime = itemEntity.getMetadata("drop_time").get(0).asLong();
+            long diff = System.currentTimeMillis() - dropTime;
+            if (5001 > diff) return;
+        }
+        for (Entity entity : itemEntity.getNearbyEntities(10.0, 10.0, 10.0)) {
             if (entity instanceof Player player) {
                 if (VirtualFilter.getInstance().getDbManager().isAutoLootEnabled(player.getUniqueId())) {
                     ItemStack stack = itemEntity.getItemStack();
-                    event.setCancelled(true); // Remove do chão
-                    deliverItem(player, stack, itemEntity.getLocation());
+                    event.setCancelled(true);
+                    // Para itens extras/espalhados (Ímã), o som é ATIVADO (true)
+                    deliverItem(player, stack, itemEntity.getLocation(), true);
                     return;
                 }
             }
         }
     }
 
-    private void deliverItem(Player player, ItemStack item, org.bukkit.Location loc) {
-        if (processItem(player, item)) return;
-
-        HashMap<Integer, ItemStack> left = player.getInventory().addItem(item);
-        player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.3f, 1.5f);
-
-        if (!left.isEmpty()) {
-            for (ItemStack remaining : left.values()) {
-                player.getWorld().dropItemNaturally(loc, remaining);
+    private void deliverItem(Player player, ItemStack item, org.bukkit.Location loc, boolean shouldPlaySound) {
+        if (!processItem(player, item)) {
+            HashMap<Integer, ItemStack> left = player.getInventory().addItem(item);
+            if (!left.isEmpty()) {
+                for (ItemStack remaining : left.values()) {
+                    player.getWorld().dropItemNaturally(loc, remaining);
+                }
             }
+        }
+        // Só toca o som se for um item de ímã/recolhimento extra
+        if (shouldPlaySound) {
+            playTeleportSound(player);
+        }
+    }
+
+    private void playTeleportSound(Player player) {
+        long now = System.currentTimeMillis();
+        long lastPlay = soundCooldowns.getOrDefault(player.getUniqueId(), 0L);
+        if (now - lastPlay > 1000) {
+            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.3f, 1.5f);
+            soundCooldowns.put(player.getUniqueId(), now);
         }
     }
 
     public boolean processItem(Player player, ItemStack item) {
-        // SEGURANÇA TOTAL: Itens com nome customizado (Slimefun/mcMMO) NUNCA são filtrados.
-        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            return false; 
-        }
-
-        String materialName = item.getType().name();
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) return false;
+        String mat = item.getType().name();
         String lang = VirtualFilter.getInstance().getDbManager().getPlayerLanguage(player.getUniqueId());
 
-        // ASF - Venda
-        if (VirtualFilter.getInstance().getDbManager().hasFilter(player.getUniqueId(), "asf", materialName)) {
-            double unitPrice = ShopGUIHook.getItemPrice(player, item);
-            double totalValue = unitPrice * item.getAmount();
+        if (VirtualFilter.getInstance().getDbManager().hasFilter(player.getUniqueId(), "asf", mat)) {
+            double price = ShopGUIHook.getItemPrice(player, item);
+            double total = price * item.getAmount();
             if (VirtualFilter.getEconomy() != null) {
-                VirtualFilter.getEconomy().depositPlayer(player, totalValue);
+                VirtualFilter.getEconomy().depositPlayer(player, total);
                 if (VirtualFilter.getInstance().getDbManager().isActionBarEnabled(player.getUniqueId())) {
                     String msg = VirtualFilter.getInstance().getMsg(lang, "asf_actionbar")
-                        .replace("%price%", String.format("%.2f", totalValue))
+                        .replace("%price%", String.format("%.2f", total))
                         .replace("%amount%", String.valueOf(item.getAmount()))
-                        .replace("%item%", materialName);
+                        .replace("%item%", mat);
                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(msg));
                 }
             }
-            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.3f, 1.2f);
             return true;
         }
-
-        // ISF - Estoque
-        if (VirtualFilter.getInstance().getDbManager().hasFilter(player.getUniqueId(), "isf", materialName)) {
-            VirtualFilter.getInstance().getDbManager().addAmount(player.getUniqueId(), materialName, item.getAmount());
-            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.2f, 1.8f);
+        if (VirtualFilter.getInstance().getDbManager().hasFilter(player.getUniqueId(), "isf", mat)) {
+            VirtualFilter.getInstance().getDbManager().addAmount(player.getUniqueId(), mat, item.getAmount());
             return true;
         }
-
-        // ABF - Bloqueio
-        if (VirtualFilter.getInstance().getDbManager().hasFilter(player.getUniqueId(), "abf", materialName)) {
-            return true;
-        }
-
-        return false;
+        return VirtualFilter.getInstance().getDbManager().hasFilter(player.getUniqueId(), "abf", mat);
     }
 }

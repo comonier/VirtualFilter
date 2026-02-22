@@ -17,7 +17,7 @@ public class DatabaseManager {
                 s.execute("CREATE TABLE IF NOT EXISTS player_filters (uuid TEXT, filter_type TEXT, slot_id INTEGER, material TEXT, amount BIGINT DEFAULT 0, PRIMARY KEY (uuid, filter_type, slot_id))");
                 s.execute("CREATE TABLE IF NOT EXISTS player_settings (uuid TEXT PRIMARY KEY, actionbar_enabled BOOLEAN DEFAULT 1, language TEXT DEFAULT 'en', autofill_enabled BOOLEAN DEFAULT 1, autoloot_enabled BOOLEAN DEFAULT 0)");
 
-                // MIGRAÇÃO: Adiciona colunas se não existirem
+                // Migração segura para garantir que as colunas existam
                 try { s.execute("ALTER TABLE player_settings ADD COLUMN autofill_enabled BOOLEAN DEFAULT 1"); } catch (SQLException ignored) {}
                 try { s.execute("ALTER TABLE player_settings ADD COLUMN autoloot_enabled BOOLEAN DEFAULT 0"); } catch (SQLException ignored) {}
             }
@@ -36,12 +36,9 @@ public class DatabaseManager {
     }
 
     public void setPlayerLanguage(UUID uuid, String lang) {
-        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, language, actionbar_enabled, autofill_enabled, autoloot_enabled) VALUES (?, ?, (SELECT actionbar_enabled FROM player_settings WHERE uuid = ?), (SELECT autofill_enabled FROM player_settings WHERE uuid = ?), (SELECT autoloot_enabled FROM player_settings WHERE uuid = ?))")) {
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO player_settings (uuid, language) VALUES (?, ?) ON CONFLICT(uuid) DO UPDATE SET language = excluded.language")) {
             ps.setString(1, uuid.toString());
             ps.setString(2, lang);
-            ps.setString(3, uuid.toString());
-            ps.setString(4, uuid.toString());
-            ps.setString(5, uuid.toString());
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }
@@ -57,12 +54,9 @@ public class DatabaseManager {
 
     public void toggleActionBar(UUID uuid) {
         boolean current = isActionBarEnabled(uuid);
-        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, actionbar_enabled, language, autofill_enabled, autoloot_enabled) VALUES (?, ?, (SELECT language FROM player_settings WHERE uuid = ?), (SELECT autofill_enabled FROM player_settings WHERE uuid = ?), (SELECT autoloot_enabled FROM player_settings WHERE uuid = ?))")) {
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO player_settings (uuid, actionbar_enabled) VALUES (?, ?) ON CONFLICT(uuid) DO UPDATE SET actionbar_enabled = excluded.actionbar_enabled")) {
             ps.setString(1, uuid.toString());
             ps.setBoolean(2, !current);
-            ps.setString(3, uuid.toString());
-            ps.setString(4, uuid.toString());
-            ps.setString(5, uuid.toString());
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }
@@ -73,39 +67,32 @@ public class DatabaseManager {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getBoolean("autofill_enabled");
         } catch (SQLException e) { e.printStackTrace(); }
-        return true;
+        return true; // PADRÃO SEMPRE LIGADO PARA NOVOS JOGADORES OU ERROS
     }
 
     public void toggleAutoFill(UUID uuid) {
         boolean current = isAutoFillEnabled(uuid);
-        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, autofill_enabled, language, actionbar_enabled, autoloot_enabled) VALUES (?, ?, (SELECT language FROM player_settings WHERE uuid = ?), (SELECT actionbar_enabled FROM player_settings WHERE uuid = ?), (SELECT autoloot_enabled FROM player_settings WHERE uuid = ?))")) {
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO player_settings (uuid, autofill_enabled) VALUES (?, ?) ON CONFLICT(uuid) DO UPDATE SET autofill_enabled = excluded.autofill_enabled")) {
             ps.setString(1, uuid.toString());
             ps.setBoolean(2, !current);
-            ps.setString(3, uuid.toString());
-            ps.setString(4, uuid.toString());
-            ps.setString(5, uuid.toString());
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // --- NOVA FUNÇÃO: AutoLoot ---
     public boolean isAutoLootEnabled(UUID uuid) {
         try (PreparedStatement ps = connection.prepareStatement("SELECT autoloot_enabled FROM player_settings WHERE uuid = ?")) {
             ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getBoolean("autoloot_enabled");
         } catch (SQLException e) { e.printStackTrace(); }
-        return false; // Padrão desligado
+        return false;
     }
 
     public void toggleAutoLoot(UUID uuid) {
         boolean current = isAutoLootEnabled(uuid);
-        try (PreparedStatement ps = connection.prepareStatement("INSERT OR REPLACE INTO player_settings (uuid, autoloot_enabled, language, actionbar_enabled, autofill_enabled) VALUES (?, ?, (SELECT language FROM player_settings WHERE uuid = ?), (SELECT actionbar_enabled FROM player_settings WHERE uuid = ?), (SELECT autofill_enabled FROM player_settings WHERE uuid = ?))")) {
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO player_settings (uuid, autoloot_enabled) VALUES (?, ?) ON CONFLICT(uuid) DO UPDATE SET autoloot_enabled = excluded.autoloot_enabled")) {
             ps.setString(1, uuid.toString());
             ps.setBoolean(2, !current);
-            ps.setString(3, uuid.toString());
-            ps.setString(4, uuid.toString());
-            ps.setString(5, uuid.toString());
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }
