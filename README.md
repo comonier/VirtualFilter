@@ -6,6 +6,18 @@
 
 ---
 
+## 🚀 Auto Loot: Critical Updates (v1.3.2)
+<p>This update focuses on fixing edge cases and ensuring full compatibility with custom items.</p>
+
+⚡ **AutoLoot (v1.3.2):** Automatically collects drops directly into your inventory or filters when breaking blocks. <br>
+🛡️ **NBT Shield:** Items with custom names or lore (Slimefun, mcMMO) are ignored by filters to prevent accidental selling. <br>
+📦 **Shulker Box Protection:** Shulkers now go directly to your inventory while preserving ALL internal content (NBT). <br>
+🧩 **Multi-Block Fix:** Fixed issue where beds and doors were destroyed by the loot funnel. <br>
+🧲 **Magnet Mode (10 Blocks):** Increased pickup range to catch all drops from explosions or TreeCutter. <br>
+🔇 **Smart Audio:** Teleport sound plays ONLY for extra drops (Magnet) with an anti-spam cooldown. <br>
+
+---
+
 ## 💎 VirtualFilter v1.3
 
 ### ⚠️ 🛑 **IMPORTANT: DATABASE BACKUP REQUIRED** 🛑 ⚠️
@@ -74,7 +86,6 @@ Unlock slots dynamically using permissions (1 to 54):
 
 ## ⚙️ Installation
 
-1.  Download the latest JAR from the [Download](https://github.com/comonier/VirtualFilter/releases/download/1.0/VirtualFilter-1.0.jar).
 2.  Drop it into your server's `plugins` folder.
 3.  Restart your server.
 4.  Configure your item prices in `plugins/VirtualFilter/prices.yml`.
