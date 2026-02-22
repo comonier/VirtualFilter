@@ -31,6 +31,18 @@ public class FilterCommands implements CommandExecutor {
 
         if (!(sender instanceof Player player)) return true;
 
+        // --- NOVO: Comando AutoLoot ---
+        if (cmd.equals("al")) {
+            VirtualFilter.getInstance().getDbManager().toggleAutoLoot(player.getUniqueId());
+            boolean newState = VirtualFilter.getInstance().getDbManager().isAutoLootEnabled(player.getUniqueId());
+            String lang = VirtualFilter.getInstance().getDbManager().getPlayerLanguage(player.getUniqueId());
+            
+            String msgKey = newState ? "autoloot_on" : "autoloot_off";
+            player.sendMessage(VirtualFilter.getInstance().getMsg(lang, msgKey));
+            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
+            return true;
+        }
+
         if (cmd.equals("vfhelp")) {
             sendHelp(player);
             return true;
@@ -50,7 +62,6 @@ public class FilterCommands implements CommandExecutor {
                 player.sendMessage("§eUsage: /vflang <en|pt>");
                 return true;
             }
-            // CORREÇÃO: Acessando o primeiro argumento da String individualmente
             String lang = args[0].toLowerCase(); 
             if (lang.equals("en") || lang.equals("pt")) {
                 VirtualFilter.getInstance().getDbManager().setPlayerLanguage(player.getUniqueId(), lang);
@@ -151,6 +162,7 @@ public class FilterCommands implements CommandExecutor {
             p.sendMessage("§6§l--- VirtualFilter Ajuda ---");
             p.sendMessage("§e/abf, /isf, /asf §7- Abre os menus de filtro.");
             p.sendMessage("§e/add<tipo> §7- Adiciona/Mescla item da mão ao filtro.");
+            p.sendMessage("§e/al §7- Ativa/Desativa o recolhimento automático (AutoLoot).");
             p.sendMessage("§e/vfat §7- Ativa/Desativa avisos na Action Bar.");
             p.sendMessage("§e/afh §7- Ativa/Desativa reposição automática da mão.");
             p.sendMessage("§e/vflang <en|pt> §7- Altera seu idioma pessoal.");
@@ -159,6 +171,7 @@ public class FilterCommands implements CommandExecutor {
             p.sendMessage("§6§l--- VirtualFilter Help ---");
             p.sendMessage("§e/abf, /isf, /asf §7- Open filter menus.");
             p.sendMessage("§e/add<type> §7- Add/Merge held item to filter.");
+            p.sendMessage("§e/al §7- Toggle automatic item collection (AutoLoot).");
             p.sendMessage("§e/vfat §7- Toggle Action Bar notifications.");
             p.sendMessage("§e/afh §7- Toggle automatic hand refill (AutoFillHand).");
             p.sendMessage("§e/vflang <en|pt> §7- Change your personal language.");

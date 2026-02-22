@@ -50,14 +50,18 @@ public class VirtualFilter extends JavaPlugin {
         getCommand("vflang").setExecutor(cmd);
         getCommand("vfhelp").setExecutor(cmd);
         getCommand("vfreload").setExecutor(cmd);
-        getCommand("afh").setExecutor(cmd); // Novo comando integrado
+        getCommand("afh").setExecutor(cmd);
+        
+        // --- LINHA ADICIONADA PARA O AUTOLOOT ---
+        getCommand("al").setExecutor(cmd); 
 
         // 5. Registro de Listeners
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
         getServer().getPluginManager().registerEvents(new FilterProcessor(), this);
-        getServer().getPluginManager().registerEvents(new AutoFillListener(), this); // Novo listener integrado
+        getServer().getPluginManager().registerEvents(new AutoFillListener(), this);
 
-        getLogger().info("VirtualFilter v1.1 enabled successfully (AutoFillHand included)!");
+        // Atualizado para v1.3 conforme seu pom.xml
+        getLogger().info("VirtualFilter v1.3 enabled successfully (AutoLoot & AutoFill included)!");
     }
 
     private void loadMessages() {
@@ -68,7 +72,7 @@ public class VirtualFilter extends JavaPlugin {
 
     public String getMsg(String playerLang, String path) {
         String lang = (playerLang == null) ? getConfig().getString("language", "en") : playerLang;
-        return messages.getString(lang + "." + path, "Message not found: " + path);
+        return messages.getString(lang + "." + path, "§cMessage not found: " + path);
     }
 
     private boolean setupEconomy() {
@@ -91,7 +95,6 @@ public class VirtualFilter extends JavaPlugin {
         getLogger().info("VirtualFilter disabled.");
     }
 
-    // --- Getters Públicos ---
     public static VirtualFilter getInstance() { return instance; }
     public static Economy getEconomy() { return econ; }
     public DatabaseManager getDbManager() { return dbManager; }

@@ -14,6 +14,8 @@ en:
   isf_actionbar: "§b+%amount% §7%item% (Stored in ISF)"
   toggle_on: "§7Feature §aENABLED"
   toggle_off: "§7Feature §cDISABLED"
+  autoloot_on: "§7AutoLoot is now §aENABLED"
+  autoloot_off: "§7AutoLoot is now §cDISABLED"
 
 pt:
   prefix: "§6§l[VirtualFilter] "
@@ -27,3 +29,5 @@ pt:
   isf_actionbar: "§b+%amount% §7%item% (Estocado no ISF)"
   toggle_on: "§7Função §aATIVADA"
   toggle_off: "§7Função §cDESATIVADA"
+  autoloot_on: "§7AutoLoot está agora §aATIVADO"
+  autoloot_off: "§7AutoLoot está agora §cDESATIVADO"
