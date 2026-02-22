@@ -17,7 +17,6 @@ public class DatabaseManager {
                 s.execute("CREATE TABLE IF NOT EXISTS player_filters (uuid TEXT, filter_type TEXT, slot_id INTEGER, material TEXT, amount BIGINT DEFAULT 0, PRIMARY KEY (uuid, filter_type, slot_id))");
                 s.execute("CREATE TABLE IF NOT EXISTS player_settings (uuid TEXT PRIMARY KEY, actionbar_enabled BOOLEAN DEFAULT 1, language TEXT DEFAULT 'en', autofill_enabled BOOLEAN DEFAULT 1, autoloot_enabled BOOLEAN DEFAULT 0)");
 
-                // Migração segura para garantir que as colunas existam
                 try { s.execute("ALTER TABLE player_settings ADD COLUMN autofill_enabled BOOLEAN DEFAULT 1"); } catch (SQLException ignored) {}
                 try { s.execute("ALTER TABLE player_settings ADD COLUMN autoloot_enabled BOOLEAN DEFAULT 0"); } catch (SQLException ignored) {}
             }
@@ -67,7 +66,7 @@ public class DatabaseManager {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getBoolean("autofill_enabled");
         } catch (SQLException e) { e.printStackTrace(); }
-        return true; // PADRÃO SEMPRE LIGADO PARA NOVOS JOGADORES OU ERROS
+        return true;
     }
 
     public void toggleAutoFill(UUID uuid) {
@@ -125,5 +124,27 @@ public class DatabaseManager {
             ps.setString(3, material);
             ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
+    }
+
+    public int withdrawFromISF(UUID uuid, String material, int requestedAmount) {
+        try {
+            long currentAmount = 0;
+            try (PreparedStatement ps = connection.prepareStatement("SELECT amount FROM player_filters WHERE uuid = ? AND material = ? AND filter_type = 'isf'")) {
+                ps.setString(1, uuid.toString());
+                ps.setString(2, material.toUpperCase());
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) currentAmount = rs.getLong("amount");
+            }
+            if (currentAmount <= 0) return 0;
+            int actualToWithdraw = (int) Math.min(currentAmount, (long) requestedAmount);
+            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters SET amount = amount - ? WHERE uuid = ? AND material = ? AND filter_type = 'isf'")) {
+                ps.setInt(1, actualToWithdraw);
+                ps.setString(2, uuid.toString());
+                ps.setString(3, material.toUpperCase());
+                ps.executeUpdate();
+            }
+            return actualToWithdraw;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
     }
 }

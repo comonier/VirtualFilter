@@ -25,29 +25,36 @@ public class FilterCommands implements CommandExecutor {
                 return true;
             }
             VirtualFilter.getInstance().reloadPlugin();
-            sender.sendMessage("§a[VirtualFilter] Configurations and Prices reloaded successfully!");
+            sender.sendMessage("§a[VirtualFilter] Configurations and Prices reloaded!");
             return true;
         }
 
         if (!(sender instanceof Player player)) return true;
 
-        // --- NOVO: Comando AutoLoot ---
+        // Tenta pegar o idioma, se falhar usa "en" (Evita o Crash do seu log)
+        String lang = "en";
+        try {
+            lang = VirtualFilter.getInstance().getDbManager().getPlayerLanguage(player.getUniqueId());
+        } catch (Exception ignored) {}
+        if (lang == null) lang = "en";
+
+        // --- Comando AutoLoot ---
         if (cmd.equals("al")) {
             VirtualFilter.getInstance().getDbManager().toggleAutoLoot(player.getUniqueId());
             boolean newState = VirtualFilter.getInstance().getDbManager().isAutoLootEnabled(player.getUniqueId());
-            String lang = VirtualFilter.getInstance().getDbManager().getPlayerLanguage(player.getUniqueId());
-            
             String msgKey = newState ? "autoloot_on" : "autoloot_off";
             player.sendMessage(VirtualFilter.getInstance().getMsg(lang, msgKey));
             player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
             return true;
         }
 
+        // --- Comando Ajuda (O que estava dando erro) ---
         if (cmd.equals("vfhelp")) {
-            sendHelp(player);
+            sendHelp(player, lang);
             return true;
         }
 
+        // --- Comando AutoFillHand ---
         if (cmd.equals("afh")) {
             VirtualFilter.getInstance().getDbManager().toggleAutoFill(player.getUniqueId());
             boolean newState = VirtualFilter.getInstance().getDbManager().isAutoFillEnabled(player.getUniqueId());
@@ -57,15 +64,16 @@ public class FilterCommands implements CommandExecutor {
             return true;
         }
 
+        // --- Comando Idioma ---
         if (cmd.equals("vflang")) {
             if (args.length == 0) {
                 player.sendMessage("§eUsage: /vflang <en|pt>");
                 return true;
             }
-            String lang = args[0].toLowerCase(); 
-            if (lang.equals("en") || lang.equals("pt")) {
-                VirtualFilter.getInstance().getDbManager().setPlayerLanguage(player.getUniqueId(), lang);
-                player.sendMessage(lang.equals("en") ? "§aLanguage set to English!" : "§aIdioma definido para Português!");
+            String newLang = args[0].toLowerCase();
+            if (newLang.equals("en") || newLang.equals("pt")) {
+                VirtualFilter.getInstance().getDbManager().setPlayerLanguage(player.getUniqueId(), newLang);
+                player.sendMessage(newLang.equals("en") ? "§aLanguage set to English!" : "§aIdioma definido para Português!");
                 player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
             } else {
                 player.sendMessage("§cInvalid language!");
@@ -73,82 +81,44 @@ public class FilterCommands implements CommandExecutor {
             return true;
         }
 
-        if (cmd.equals("vfat")) {
-            VirtualFilter.getInstance().getDbManager().toggleActionBar(player.getUniqueId());
-            boolean newState = VirtualFilter.getInstance().getDbManager().isActionBarEnabled(player.getUniqueId());
-            String status = newState ? "§aENABLED" : "§cDISABLED";
-            player.sendMessage("§6[VirtualFilter] §7Action Bar notifications are now " + status);
-            return true;
-        }
-
+        // --- Comandos de Menu (ABF, ISF, ASF) ---
         if (cmd.equals("abf") || cmd.equals("isf") || cmd.equals("asf")) {
             FilterMenu.open(player, cmd);
             player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1.0f, 1.0f);
             return true;
         }
 
+        // --- Comandos de Adição (/addabf, /addisf, /addasf) ---
         if (cmd.startsWith("add")) {
             String type = cmd.replace("add", "");
             ItemStack item = player.getInventory().getItemInMainHand();
             
             if (item.getType() == Material.AIR || item.getType().getMaxStackSize() <= 1) {
-                player.sendMessage("§cInvalid item! Non-stackable items are not allowed.");
+                player.sendMessage("§cInvalid item! Only stackable items allowed.");
                 return true;
             }
 
             Material mat = item.getType();
-            
-            int existingSlot = -1;
-            for (int i = 0; i < 54; i++) {
-                String m = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, i);
-                if (m != null && m.equalsIgnoreCase(mat.name())) {
-                    existingSlot = i;
-                    break;
-                }
-            }
-
-            if (existingSlot != -1) {
-                if (type.equals("isf")) {
-                    long toAdd = 0;
-                    for (ItemStack invItem : player.getInventory().getContents()) {
-                        if (invItem != null && invItem.getType() == mat) {
-                            toAdd += invItem.getAmount();
-                            invItem.setAmount(0);
-                        }
-                    }
-                    VirtualFilter.getInstance().getDbManager().addAmount(player.getUniqueId(), mat.name(), (int) toAdd);
-                    player.sendMessage("§aItems merged into your existing " + mat.name() + " filter.");
-                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
-                } else {
-                    player.sendMessage("§cYou already have a filter for " + mat.name() + "!");
-                }
-                return true;
-            }
-
             int allowed = getMaxSlots(player, type);
             int targetSlot = -1;
+
             for (int i = 0; i < allowed; i++) {
-                if (VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, i) == null) {
-                    targetSlot = i; break;
+                String m = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, i);
+                if (m == null) {
+                    targetSlot = i;
+                    break;
+                } else if (m.equalsIgnoreCase(mat.name())) {
+                    player.sendMessage("§cFilter already exists for " + mat.name());
+                    return true;
                 }
             }
             
             if (targetSlot == -1) {
-                player.sendMessage("§cNo slots available! Upgrade your rank for more space.");
+                player.sendMessage("§cNo slots available!");
                 return true;
             }
 
-            long initialAmount = 0;
-            if (type.equals("isf")) {
-                for (ItemStack invItem : player.getInventory().getContents()) {
-                    if (invItem != null && invItem.getType() == mat) {
-                        initialAmount += invItem.getAmount();
-                        invItem.setAmount(0);
-                    }
-                }
-            }
-
-            saveItem(player, type, targetSlot, mat.name(), initialAmount);
+            saveItem(player, type, targetSlot, mat.name(), 0);
             player.sendMessage("§aAdded to " + type.toUpperCase() + " slot " + (targetSlot + 1));
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
             return true;
@@ -156,31 +126,28 @@ public class FilterCommands implements CommandExecutor {
         return false;
     }
 
-    private void sendHelp(Player p) {
-        String lang = VirtualFilter.getInstance().getDbManager().getPlayerLanguage(p.getUniqueId());
+    private void sendHelp(Player p, String lang) {
         if (lang.equalsIgnoreCase("pt")) {
             p.sendMessage("§6§l--- VirtualFilter Ajuda ---");
             p.sendMessage("§e/abf, /isf, /asf §7- Abre os menus de filtro.");
-            p.sendMessage("§e/add<tipo> §7- Adiciona/Mescla item da mão ao filtro.");
-            p.sendMessage("§e/al §7- Ativa/Desativa o recolhimento automático (AutoLoot).");
-            p.sendMessage("§e/vfat §7- Ativa/Desativa avisos na Action Bar.");
-            p.sendMessage("§e/afh §7- Ativa/Desativa reposição automática da mão.");
-            p.sendMessage("§e/vflang <en|pt> §7- Altera seu idioma pessoal.");
-            p.sendMessage("§e/vfhelp §7- Mostra este menu de ajuda.");
+            p.sendMessage("§e/add<tipo> §7- Adiciona item da mão ao filtro.");
+            p.sendMessage("§e/al §7- Ativa/Desativa o AutoLoot.");
+            p.sendMessage("§e/afh §7- Ativa/Desativa o AutoFillHand.");
+            p.sendMessage("§e/vflang <en|pt> §7- Altera seu idioma.");
+            p.sendMessage("§e/vfhelp §7- Mostra este menu.");
         } else {
             p.sendMessage("§6§l--- VirtualFilter Help ---");
             p.sendMessage("§e/abf, /isf, /asf §7- Open filter menus.");
-            p.sendMessage("§e/add<type> §7- Add/Merge held item to filter.");
-            p.sendMessage("§e/al §7- Toggle automatic item collection (AutoLoot).");
-            p.sendMessage("§e/vfat §7- Toggle Action Bar notifications.");
-            p.sendMessage("§e/afh §7- Toggle automatic hand refill (AutoFillHand).");
-            p.sendMessage("§e/vflang <en|pt> §7- Change your personal language.");
+            p.sendMessage("§e/add<type> §7- Add held item to filter.");
+            p.sendMessage("§e/al §7- Toggle AutoLoot.");
+            p.sendMessage("§e/afh §7- Toggle AutoFillHand.");
+            p.sendMessage("§e/vflang <en|pt> §7- Change your language.");
             p.sendMessage("§e/vfhelp §7- Show this help menu.");
         }
     }
 
     private int getMaxSlots(Player player, String type) {
-        if (player.isOp() || player.hasPermission("virtualfilter.admin") || player.hasPermission("*")) return 54;
+        if (player.isOp() || player.hasPermission("virtualfilter.admin")) return 54;
         int max = VirtualFilter.getInstance().getConfig().getInt("default-slots." + type, 1);
         for (PermissionAttachmentInfo permission : player.getEffectivePermissions()) {
             String perm = permission.getPermission().toLowerCase();

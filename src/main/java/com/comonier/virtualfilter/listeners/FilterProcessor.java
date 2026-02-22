@@ -18,6 +18,7 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -37,7 +38,6 @@ public class FilterProcessor implements Listener {
         if (processItem(player, item)) {
             event.getItem().remove();
             event.setCancelled(true);
-            // Pickup manual no chão sempre toca som (opcional, pode remover se preferir silêncio aqui)
             playTeleportSound(player);
         }
     }
@@ -48,7 +48,6 @@ public class FilterProcessor implements Listener {
         if (VirtualFilter.getInstance().getDbManager().isAutoLootEnabled(player.getUniqueId())) {
             event.setDropItems(false); 
             event.getBlock().getDrops(player.getInventory().getItemInMainHand(), player).forEach(drop -> {
-                // Para o bloco quebrado diretamente, o som é DESATIVADO (false)
                 deliverItem(player, drop, event.getBlock().getLocation(), false);
             });
         }
@@ -67,7 +66,6 @@ public class FilterProcessor implements Listener {
                 if (VirtualFilter.getInstance().getDbManager().isAutoLootEnabled(player.getUniqueId())) {
                     ItemStack stack = itemEntity.getItemStack();
                     event.setCancelled(true);
-                    // Para itens extras/espalhados (Ímã), o som é ATIVADO (true)
                     deliverItem(player, stack, itemEntity.getLocation(), true);
                     return;
                 }
@@ -84,16 +82,14 @@ public class FilterProcessor implements Listener {
                 }
             }
         }
-        // Só toca o som se for um item de ímã/recolhimento extra
-        if (shouldPlaySound) {
-            playTeleportSound(player);
-        }
+        if (shouldPlaySound) playTeleportSound(player);
     }
 
     private void playTeleportSound(Player player) {
         long now = System.currentTimeMillis();
         long lastPlay = soundCooldowns.getOrDefault(player.getUniqueId(), 0L);
-        if (now - lastPlay > 1000) {
+        // COOLDOWN ATUALIZADO: 2000ms = 2 segundos
+        if (now - lastPlay > 2000) {
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.3f, 1.5f);
             soundCooldowns.put(player.getUniqueId(), now);
         }
