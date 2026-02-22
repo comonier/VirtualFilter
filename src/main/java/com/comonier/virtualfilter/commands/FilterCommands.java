@@ -48,8 +48,8 @@ public class FilterCommands implements CommandExecutor {
             return true;
         }
 
-        // --- Comando Ajuda (O que estava dando erro) ---
-        if (cmd.equals("vfhelp")) {
+        // Agora aceita vfhelp, vf e vfilter
+        if (cmd.equals("vfhelp") || cmd.equals("vf") || cmd.equals("vfilter")) {
             sendHelp(player, lang);
             return true;
         }
