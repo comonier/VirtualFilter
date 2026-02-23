@@ -28,6 +28,7 @@ public class FilterProcessor implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerDrop(PlayerDropItemEvent event) {
+        // Marca o item com o tempo atual para o ímã ignorar por 5 segundos
         event.getItemDrop().setMetadata("drop_time", new FixedMetadataValue(VirtualFilter.getInstance(), System.currentTimeMillis()));
     }
 
@@ -56,11 +57,15 @@ public class FilterProcessor implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onItemSpawn(ItemSpawnEvent event) {
         Item itemEntity = event.getEntity();
+        
+        // Lógica de Delay para o Ímã (Evita bumerangue ao jogar item fora)
         if (itemEntity.hasMetadata("drop_time")) {
             long dropTime = itemEntity.getMetadata("drop_time").get(0).asLong();
             long diff = System.currentTimeMillis() - dropTime;
             if (5001 > diff) return;
         }
+        
+        // Raio de 10 blocos para o ímã (Ideal para TreeCutter e Explosões)
         for (Entity entity : itemEntity.getNearbyEntities(10.0, 10.0, 10.0)) {
             if (entity instanceof Player player) {
                 if (VirtualFilter.getInstance().getDbManager().isAutoLootEnabled(player.getUniqueId())) {
@@ -88,7 +93,7 @@ public class FilterProcessor implements Listener {
     private void playTeleportSound(Player player) {
         long now = System.currentTimeMillis();
         long lastPlay = soundCooldowns.getOrDefault(player.getUniqueId(), 0L);
-        // COOLDOWN ATUALIZADO: 2000ms = 2 segundos
+        // COOLDOWN: 2 segundos para evitar spam sonoro
         if (now - lastPlay > 2000) {
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.3f, 1.5f);
             soundCooldowns.put(player.getUniqueId(), now);
@@ -96,10 +101,13 @@ public class FilterProcessor implements Listener {
     }
 
     public boolean processItem(Player player, ItemStack item) {
+        // PROTEÇÃO NBT: Itens com nome customizado (Slimefun, mcMMO, Bedrock Meta) não são filtrados
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) return false;
+
         String mat = item.getType().name();
         String lang = VirtualFilter.getInstance().getDbManager().getPlayerLanguage(player.getUniqueId());
 
+        // 1. ASF - VENDA
         if (VirtualFilter.getInstance().getDbManager().hasFilter(player.getUniqueId(), "asf", mat)) {
             double price = ShopGUIHook.getItemPrice(player, item);
             double total = price * item.getAmount();
@@ -115,10 +123,14 @@ public class FilterProcessor implements Listener {
             }
             return true;
         }
+
+        // 2. ISF - ESTOQUE
         if (VirtualFilter.getInstance().getDbManager().hasFilter(player.getUniqueId(), "isf", mat)) {
             VirtualFilter.getInstance().getDbManager().addAmount(player.getUniqueId(), mat, item.getAmount());
             return true;
         }
+
+        // 3. ABF - BLOQUEIO
         return VirtualFilter.getInstance().getDbManager().hasFilter(player.getUniqueId(), "abf", mat);
     }
 }

@@ -1,40 +1,42 @@
 name: VirtualFilter
-version: 1.3.4
+version: 1.4
 main: com.comonier.virtualfilter.VirtualFilter
 api-version: 1.21
-author: comonier
-description: Professional Independent Virtual Filtering System.
-
+depend: [Vault]
+softdepend: [ShopGUIPlus]
 commands:
   abf:
-    description: Opens the AutoBlockFilter menu.
-  addabf:
-    description: Adds the item in hand to the first free ABF slot.
+    description: Opens the AutoBlock filter menu.
   isf:
-    description: Opens the InfinityStackFilter menu.
-  addisf:
-    description: Adds the item in hand to the first free ISF slot.
+    description: Opens the InfinityStack virtual storage menu.
   asf:
-    description: Opens the AutoSellFilter menu.
+    description: Opens the AutoSell filter menu.
+  addabf:
+    description: Add held item to AutoBlock.
+  addisf:
+    description: Add held item to InfinityStack.
   addasf:
-    description: Adds the item in hand to the first free ASF slot.
+    description: Add held item to AutoSell.
+  remabf:
+    description: Remove held item from AutoBlock.
+  remisf:
+    description: Remove held item from InfinityStack.
+  remasf:
+    description: Remove held item from AutoSell.
+  isg:
+    description: Withdraw items from your ISF storage by slot ID.
+    aliases: [sacar, getisf]
+  al:
+    description: Toggle AutoLoot.
+  afh:
+    description: Toggle AutoFillHand.
   vfat:
-    description: Toggle AutoSell Action Bar notifications.
+    description: Toggle Action Bar notifications.
   vflang:
-    description: Changes personal language (en/pt).
+    description: Change personal language.
   vfhelp:
     description: Shows all commands and features.
     aliases: [vf, vfilter]
   vfreload:
-    description: Reloads plugin configurations and prices.
+    description: Reload configurations and prices.
     permission: virtualfilter.admin
-  afh:
-    description: Toggle the AutoFillHand feature.
-  al:
-    description: Toggle the AutoLoot feature.
-
-permissions:
-  virtualfilter.use:
-    default: true
-  virtualfilter.admin:
-    default: op

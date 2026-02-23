@@ -38,30 +38,39 @@ public class VirtualFilter extends JavaPlugin {
         this.dbManager.setupDatabase();
         this.infinityManager = new InfinityManager();
 
-        // 4. Registro de Comandos
+        // 4. Registro de Comandos (Centralizado no FilterCommands)
         FilterCommands cmd = new FilterCommands();
+        
+        // Menus e Configurações
         getCommand("abf").setExecutor(cmd);
         getCommand("isf").setExecutor(cmd);
         getCommand("asf").setExecutor(cmd);
-        getCommand("addabf").setExecutor(cmd);
-        getCommand("addisf").setExecutor(cmd);
-        getCommand("addasf").setExecutor(cmd);
         getCommand("vfat").setExecutor(cmd);
         getCommand("vflang").setExecutor(cmd);
         getCommand("vfhelp").setExecutor(cmd);
         getCommand("vfreload").setExecutor(cmd);
-        getCommand("afh").setExecutor(cmd);
         
-        // --- LINHA ADICIONADA PARA O AUTOLOOT ---
+        // Funções de Automação
         getCommand("al").setExecutor(cmd); 
+        getCommand("afh").setExecutor(cmd);
 
-        // 5. Registro de Listeners
+        // Adição de Itens (Filtros)
+        getCommand("addabf").setExecutor(cmd);
+        getCommand("addisf").setExecutor(cmd);
+        getCommand("addasf").setExecutor(cmd);
+
+        // NOVOS: Remoção e Saque (v1.4 - Bedrock Friendly)
+        getCommand("remabf").setExecutor(cmd);
+        getCommand("remisf").setExecutor(cmd);
+        getCommand("remasf").setExecutor(cmd);
+        getCommand("isg").setExecutor(cmd);
+
+        // 5. Registro de Listeners (Eventos)
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
         getServer().getPluginManager().registerEvents(new FilterProcessor(), this);
         getServer().getPluginManager().registerEvents(new AutoFillListener(), this);
 
-        // Atualizado para v1.3 conforme seu pom.xml
-        getLogger().info("VirtualFilter v1.3 enabled successfully (AutoLoot & AutoFill included)!");
+        getLogger().info("VirtualFilter v1.4 enabled successfully! Ready for bedrock & java players.");
     }
 
     private void loadMessages() {
@@ -71,8 +80,12 @@ public class VirtualFilter extends JavaPlugin {
     }
 
     public String getMsg(String playerLang, String path) {
+        // Fallback para a linguagem da config caso o playerLang seja nulo
         String lang = (playerLang == null) ? getConfig().getString("language", "en") : playerLang;
-        return messages.getString(lang + "." + path, "§cMessage not found: " + path);
+        String msg = messages.getString(lang + "." + path);
+        
+        if (msg == null) return "§cMessage not found: " + path;
+        return msg.replace("&", "§");
     }
 
     private boolean setupEconomy() {
@@ -92,7 +105,7 @@ public class VirtualFilter extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        getLogger().info("VirtualFilter disabled.");
+        getLogger().info("VirtualFilter v1.4 disabled.");
     }
 
     public static VirtualFilter getInstance() { return instance; }

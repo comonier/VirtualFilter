@@ -1,33 +1,37 @@
 # ==========================================================
-#             VirtualFilter - Messages
+#             VirtualFilter - Messages v1.4
 # ==========================================================
 
 en:
   prefix: "§6§l[VirtualFilter] "
-  added: "§aItem §f%item% §aadded to slot %slot%."
-  removed: "§aFilter removed."
+  added: "§aItem §f%item% §aadded to %type%."
+  removed: "§aRemoved §f%item% §afrom %type% filter."
   replaced: "§aFilter in slot %slot% replaced by §f%item%."
   no_permission: "§cNo permission."
   inv_full: "§cYour inventory is full!"
-  withdraw: "§aWithdrawn %amount%x %item% from storage."
+  withdraw: "§aWithdrew %amount%x %item% from ISF storage."
+  no_item_isf: "§cNo %item% found in your ISF storage."
   asf_actionbar: "§a+$%price% §7(Sold %amount%x %item%)"
   isf_actionbar: "§b+%amount% §7%item% (Stored in ISF)"
-  toggle_on: "§7Feature §aENABLED"
-  toggle_off: "§7Feature §cDISABLED"
+  isf_refill: "§6[VirtualFilter] §f%item% §7refilled from ISF storage!"
   autoloot_on: "§7AutoLoot is now §aENABLED"
   autoloot_off: "§7AutoLoot is now §cDISABLED"
+  autofill_on: "§7AutoFillHand is now §aENABLED"
+  autofill_off: "§7AutoFillHand is now §cDISABLED"
 
 pt:
   prefix: "§6§l[VirtualFilter] "
-  added: "§aItem §f%item% §aadicionado ao slot %slot%."
-  removed: "§aFiltro removido."
+  added: "§aItem §f%item% §aadicionado ao %type%."
+  removed: "§aRemovido §f%item% §ado filtro %type%."
   replaced: "§aFiltro no slot %slot% substituído por §f%item%."
   no_permission: "§cSem permissão."
   inv_full: "§cSeu inventário está cheio!"
-  withdraw: "§aRetirado %amount%x %item% do estoque."
+  withdraw: "§aRetirado %amount%x %item% do estoque ISF."
+  no_item_isf: "§cItem %item% não encontrado no seu estoque ISF."
   asf_actionbar: "§a+$%price% §7(Vendido %amount%x %item%)"
   isf_actionbar: "§b+%amount% §7%item% (Estocado no ISF)"
-  toggle_on: "§7Função §aATIVADA"
-  toggle_off: "§7Função §cDESATIVADA"
+  isf_refill: "§6[VirtualFilter] §f%item% §7reposto do estoque ISF!"
   autoloot_on: "§7AutoLoot está agora §aATIVADO"
   autoloot_off: "§7AutoLoot está agora §cDESATIVADO"
+  autofill_on: "§7AutoFillHand está agora §aATIVADO"
+  autofill_off: "§7AutoFillHand está agora §cDESATIVADO"

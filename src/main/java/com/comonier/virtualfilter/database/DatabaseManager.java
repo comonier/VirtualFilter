@@ -147,4 +147,28 @@ public class DatabaseManager {
         } catch (SQLException e) { e.printStackTrace(); }
         return 0;
     }
+    // Remove o filtro por material (Útil para comandos /remabf, /remasf, /remisf)
+    public boolean removeFilterMaterial(UUID uuid, String type, String material) {
+        try (PreparedStatement ps = connection.prepareStatement(
+                "DELETE FROM player_filters WHERE uuid = ? AND filter_type = ? AND material = ?")) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, type.toLowerCase());
+            ps.setString(3, material.toUpperCase());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
+
+    // Retorna a quantidade total estocada no ISF para um item
+    public long getISFAmount(UUID uuid, String material) {
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT amount FROM player_filters WHERE uuid = ? AND material = ? AND filter_type = 'isf'")) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, material.toUpperCase());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getLong("amount");
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
+    }
+
 }
