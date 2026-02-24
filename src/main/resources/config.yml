@@ -1,18 +1,18 @@
 # ==========================================================
-#             VirtualFilter - Configuração
+#             VirtualFilter - Configuração v1.5
 # ==========================================================
-# Language (en/pt)
 language: en
 
-# Default slots for every player (initial amount)
+# Default slots for every player
 default-slots:
   abf: 1
   isf: 1
   asf: 1
 
-# --- NOVO: Notificações de Venda ---
-# Define se a Action Bar virá ativada por padrão para novos jogadores.
+# Define se o aviso de baú virá ativado por padrão
+default-chest-debug-enabled: true
+
+# Notificações de Venda na Action Bar
 default-actionbar-enabled: true
 
-# Database type: SQLite
 storage-type: SQLITE

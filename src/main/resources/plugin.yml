@@ -1,42 +1,58 @@
 name: VirtualFilter
-version: 1.4
+version: 1.5
 main: com.comonier.virtualfilter.VirtualFilter
 api-version: 1.21
 depend: [Vault]
 softdepend: [ShopGUIPlus]
+
 commands:
   abf:
-    description: Opens the AutoBlock filter menu.
+    description: Abre o menu do AutoBlock.
   isf:
-    description: Opens the InfinityStack virtual storage menu.
+    description: Abre o menu do InfinityStack.
   asf:
-    description: Opens the AutoSell filter menu.
+    description: Abre o menu do AutoSell.
   addabf:
-    description: Add held item to AutoBlock.
+    description: Adiciona o item da mão ao AutoBlock.
   addisf:
-    description: Add held item to InfinityStack.
+    description: Adiciona o item da mão ao InfinityStack.
   addasf:
-    description: Add held item to AutoSell.
+    description: Adiciona o item da mão ao AutoSell.
   remabf:
-    description: Remove held item from AutoBlock.
+    description: Remove o item da mão ou por slot do AutoBlock.
+    aliases: [rabf]
   remisf:
-    description: Remove held item from InfinityStack.
+    description: Remove o item da mão ou por slot do InfinityStack.
+    aliases: [risf]
   remasf:
-    description: Remove held item from AutoSell.
+    description: Remove o item da mão ou por slot do AutoSell.
+    aliases: [rasf]
   isg:
-    description: Withdraw items from your ISF storage by slot ID.
+    description: Saca itens do seu estoque ISF por ID do slot.
     aliases: [sacar, getisf]
   al:
-    description: Toggle AutoLoot.
+    description: Ativa/Desativa o AutoLoot.
   afh:
-    description: Toggle AutoFillHand.
+    description: Ativa/Desativa o AutoFillHand (Busca no ISF).
+  vfcb:
+    description: Ativa/Desativa o relatório de quebra de baús.
+    aliases: [chestdebug]
   vfat:
-    description: Toggle Action Bar notifications.
+    description: Alterna avisos na Action Bar.
   vflang:
-    description: Change personal language.
+    description: Altera o idioma pessoal (en/pt).
   vfhelp:
-    description: Shows all commands and features.
+    description: Mostra o menu de ajuda.
     aliases: [vf, vfilter]
   vfreload:
-    description: Reload configurations and prices.
+    description: Recarrega as configurações.
     permission: virtualfilter.admin
+    permission-message: §cSem permissão.
+
+permissions:
+  virtualfilter.admin:
+    description: Permissao para usar o reload do plugin.
+    default: op
+  virtualfilter.chestdebug:
+    description: Permissao para ver o relatorio de baus.
+    default: true

@@ -29,8 +29,10 @@ public class VirtualFilter extends JavaPlugin {
         ShopGUIHook.loadPrices();
 
         // 2. Integração com Economia (Vault)
-        if (!setupEconomy()) {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
             getLogger().severe("Vault not found! AutoSell feature will not pay players.");
+        } else {
+            setupEconomy();
         }
 
         // 3. Banco de Dados e Gerenciadores
@@ -54,46 +56,48 @@ public class VirtualFilter extends JavaPlugin {
         getCommand("al").setExecutor(cmd); 
         getCommand("afh").setExecutor(cmd);
 
-        // Adição de Itens (Filtros)
+        // Adição e Remoção (v1.4+)
         getCommand("addabf").setExecutor(cmd);
         getCommand("addisf").setExecutor(cmd);
         getCommand("addasf").setExecutor(cmd);
-
-        // NOVOS: Remoção e Saque (v1.4 - Bedrock Friendly)
         getCommand("remabf").setExecutor(cmd);
         getCommand("remisf").setExecutor(cmd);
         getCommand("remasf").setExecutor(cmd);
         getCommand("isg").setExecutor(cmd);
+
+        // NOVO v1.5: Comando de Debug de Baús (vfcb)
+        getCommand("vfcb").setExecutor(cmd);
 
         // 5. Registro de Listeners (Eventos)
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
         getServer().getPluginManager().registerEvents(new FilterProcessor(), this);
         getServer().getPluginManager().registerEvents(new AutoFillListener(), this);
 
-        getLogger().info("VirtualFilter v1.4 enabled successfully! Ready for bedrock & java players.");
+        getLogger().info("VirtualFilter v1.5 enabled successfully! Chest Guard system active.");
     }
 
     private void loadMessages() {
         File file = new File(getDataFolder(), "messages.yml");
-        if (!file.exists()) saveResource("messages.yml", false);
+        // LOGICA INVERSA: Se o arquivo nao existir
+        if (false == file.exists()) saveResource("messages.yml", false);
         messages = YamlConfiguration.loadConfiguration(file);
     }
 
     public String getMsg(String playerLang, String path) {
-        // Fallback para a linguagem da config caso o playerLang seja nulo
-        String lang = (playerLang == null) ? getConfig().getString("language", "en") : playerLang;
+        // Fallback seguro: se playerLang for nulo, usa o da config
+        String lang = (null == playerLang) ? getConfig().getString("language", "en") : playerLang;
         String msg = messages.getString(lang + "." + path);
         
-        if (msg == null) return "§cMessage not found: " + path;
+        if (null == msg) return "§cMessage not found: " + path;
         return msg.replace("&", "§");
     }
 
     private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) return false;
+        // LOGICA INVERSA: Se o provedor for nulo
+        if (null == rsp) return false;
         econ = rsp.getProvider();
-        return econ != null;
+        return null != econ;
     }
 
     public void reloadPlugin() {
@@ -105,7 +109,7 @@ public class VirtualFilter extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        getLogger().info("VirtualFilter v1.4 disabled.");
+        getLogger().info("VirtualFilter v1.5 disabled.");
     }
 
     public static VirtualFilter getInstance() { return instance; }

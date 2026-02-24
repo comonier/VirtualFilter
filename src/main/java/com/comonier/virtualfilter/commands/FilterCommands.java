@@ -40,6 +40,18 @@ public class FilterCommands implements CommandExecutor {
             return true;
         }
 
+        // --- NOVO v1.5: Comando de Aviso de Baú ---
+        if (cmd.equals("vfcb") || cmd.equals("chestdebug")) {
+            if (!player.hasPermission("virtualfilter.chestdebug")) {
+                player.sendMessage("§cNo permission.");
+                return true;
+            }
+            VirtualFilter.getInstance().getDbManager().toggleChestDebug(player.getUniqueId());
+            boolean state = VirtualFilter.getInstance().getDbManager().isChestDebugEnabled(player.getUniqueId());
+            player.sendMessage("§6[VirtualFilter] §7Aviso de baú: " + (state ? "§aLIGADO" : "§cDESLIGADO"));
+            return true;
+        }
+
         if (cmd.equals("al")) {
             VirtualFilter.getInstance().getDbManager().toggleAutoLoot(player.getUniqueId());
             boolean newState = VirtualFilter.getInstance().getDbManager().isAutoLootEnabled(player.getUniqueId());
@@ -85,47 +97,51 @@ public class FilterCommands implements CommandExecutor {
 
         if (cmd.startsWith("rem")) {
             String type = cmd.replace("rem", "");
-            ItemStack item = player.getInventory().getItemInMainHand();
-            if (item.getType() == Material.AIR) return true;
+            int targetSlot = -1;
+            String handMat = null;
 
-            if (VirtualFilter.getInstance().getDbManager().removeFilterMaterial(player.getUniqueId(), type, item.getType().name())) {
-                player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "removed").replace("%item%", item.getType().name()).replace("%type%", type.toUpperCase()));
+            if (2 > args.length && 0 != args.length) {
+                try { targetSlot = Integer.parseInt(args[0]) - 1; } catch (Exception ignored) {}
+            } else {
+                ItemStack hand = player.getInventory().getItemInMainHand();
+                if (hand.getType() != Material.AIR) handMat = hand.getType().name();
+            }
+
+            boolean removed;
+            if (targetSlot != -1) {
+                removed = VirtualFilter.getInstance().getDbManager().removeFilterBySlot(player.getUniqueId(), type, targetSlot);
+            } else if (handMat != null) {
+                removed = VirtualFilter.getInstance().getDbManager().removeFilterMaterial(player.getUniqueId(), type, handMat);
+            } else {
+                player.sendMessage("§cUse: /rem" + type + " <slot_id>");
+                return true;
+            }
+
+            if (removed) {
+                player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "removed").replace("%type%", type.toUpperCase()));
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
             }
             return true;
         }
 
-        // --- SACAR DO ISF POR SLOT ID (/isg <slot> [quantia|all]) ---
         if (cmd.equals("isg") || cmd.equals("sacar")) {
-            if (2 > args.length && !cmd.equals("sacar")) { // Exige ao menos o slot
+            if (1 > args.length && !cmd.equals("sacar")) {
                 player.sendMessage("§eUsage: /isg <slot_id> [amount|all]");
                 return true;
             }
-
             int slotId;
-            try {
-                slotId = Integer.parseInt(args[0]) - 1; // Ajusta de 1-54 para 0-53
-            } catch (Exception e) {
-                player.sendMessage("§cSlot ID must be a number!");
-                return true;
-            }
+            try { slotId = Integer.parseInt(args[0]) - 1; } catch (Exception e) { return true; }
 
             String matName = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), "isf", slotId);
-            if (matName == null) {
-                player.sendMessage("§cNo filter found in Slot " + (slotId + 1));
-                return true;
-            }
+            if (matName == null) return true;
 
             long available = VirtualFilter.getInstance().getDbManager().getISFAmount(player.getUniqueId(), matName);
-            if (0 >= available) {
-                player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "no_item_isf").replace("%item%", matName));
-                return true;
-            }
+            if (0 >= available) return true;
 
             int toWithdraw = 64;
             if (args.length > 1) {
                 if (args[1].equalsIgnoreCase("all")) toWithdraw = (int) Math.min(available, 2304);
-                else try { toWithdraw = Integer.parseInt(args[1]); } catch (Exception e) { toWithdraw = 64; }
+                else try { toWithdraw = Integer.parseInt(args[1]); } catch (Exception ignored) {}
             }
 
             int taken = VirtualFilter.getInstance().getDbManager().withdrawFromISF(player.getUniqueId(), matName, toWithdraw);
@@ -133,7 +149,6 @@ public class FilterCommands implements CommandExecutor {
                 HashMap<Integer, ItemStack> left = player.getInventory().addItem(new ItemStack(Material.getMaterial(matName), taken));
                 if (!left.isEmpty()) {
                     for (ItemStack s : left.values()) VirtualFilter.getInstance().getDbManager().addAmount(player.getUniqueId(), matName, s.getAmount());
-                    player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "inv_full"));
                 }
                 player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "withdraw").replace("%amount%", String.valueOf(taken)).replace("%item%", matName));
                 player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
@@ -147,16 +162,18 @@ public class FilterCommands implements CommandExecutor {
         if (lang.equalsIgnoreCase("pt")) {
             p.sendMessage("§6§l--- VirtualFilter Ajuda ---");
             p.sendMessage("§e/add<tipo> §7- Adiciona item da mão.");
-            p.sendMessage("§e/rem<tipo> §7- Remove item da mão.");
+            p.sendMessage("§e/rem<tipo> [slot] §7- Remove da mão ou por slot.");
             p.sendMessage("§e/isg <slot> <quantia|all> §7- Saca do ISF.");
             p.sendMessage("§e/al, /afh §7- Alterna Loot/Fill.");
+            p.sendMessage("§e/vfcb §7- Alterna aviso de quebra de baú.");
             p.sendMessage("§e/vfhelp §7- Este menu.");
         } else {
             p.sendMessage("§6§l--- VirtualFilter Help ---");
             p.sendMessage("§e/add<type> §7- Add held item.");
-            p.sendMessage("§e/rem<type> §7- Remove held item.");
+            p.sendMessage("§e/rem<type> [slot] §7- Remove held item or slot.");
             p.sendMessage("§e/isg <slot> <amount|all> §7- Withdraw from ISF.");
             p.sendMessage("§e/al, /afh §7- Toggle Loot/Fill.");
+            p.sendMessage("§e/vfcb §7- Toggle chest break debug.");
             p.sendMessage("§e/vfhelp §7- This help menu.");
         }
     }

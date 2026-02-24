@@ -15,10 +15,12 @@ public class DatabaseManager {
             connection = DriverManager.getConnection("jdbc:sqlite:" + new File(folder, "storage.db"));
             try (Statement s = connection.createStatement()) {
                 s.execute("CREATE TABLE IF NOT EXISTS player_filters (uuid TEXT, filter_type TEXT, slot_id INTEGER, material TEXT, amount BIGINT DEFAULT 0, PRIMARY KEY (uuid, filter_type, slot_id))");
-                s.execute("CREATE TABLE IF NOT EXISTS player_settings (uuid TEXT PRIMARY KEY, actionbar_enabled BOOLEAN DEFAULT 1, language TEXT DEFAULT 'en', autofill_enabled BOOLEAN DEFAULT 1, autoloot_enabled BOOLEAN DEFAULT 0)");
+                s.execute("CREATE TABLE IF NOT EXISTS player_settings (uuid TEXT PRIMARY KEY, actionbar_enabled BOOLEAN DEFAULT 1, language TEXT DEFAULT 'en', autofill_enabled BOOLEAN DEFAULT 1, autoloot_enabled BOOLEAN DEFAULT 0, chest_debug BOOLEAN DEFAULT 1)");
 
+                // Migrações de segurança
                 try { s.execute("ALTER TABLE player_settings ADD COLUMN autofill_enabled BOOLEAN DEFAULT 1"); } catch (SQLException ignored) {}
                 try { s.execute("ALTER TABLE player_settings ADD COLUMN autoloot_enabled BOOLEAN DEFAULT 0"); } catch (SQLException ignored) {}
+                try { s.execute("ALTER TABLE player_settings ADD COLUMN chest_debug BOOLEAN DEFAULT 1"); } catch (SQLException ignored) {}
             }
         } catch (SQLException e) { e.printStackTrace(); }
     }
@@ -96,6 +98,25 @@ public class DatabaseManager {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
+    // --- NOVO v1.5: Chest Debug Settings ---
+    public boolean isChestDebugEnabled(UUID uuid) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT chest_debug FROM player_settings WHERE uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getBoolean("chest_debug");
+        } catch (SQLException e) { e.printStackTrace(); }
+        return VirtualFilter.getInstance().getConfig().getBoolean("default-chest-debug-enabled", true);
+    }
+
+    public void toggleChestDebug(UUID uuid) {
+        boolean current = isChestDebugEnabled(uuid);
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO player_settings (uuid, chest_debug) VALUES (?, ?) ON CONFLICT(uuid) DO UPDATE SET chest_debug = excluded.chest_debug")) {
+            ps.setString(1, uuid.toString());
+            ps.setBoolean(2, !current);
+            ps.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
+
     public String getMaterialAtSlot(UUID uuid, String type, int slot) {
         try (PreparedStatement ps = connection.prepareStatement("SELECT material FROM player_filters WHERE uuid = ? AND filter_type = ? AND slot_id = ?")) {
             ps.setString(1, uuid.toString());
@@ -135,7 +156,7 @@ public class DatabaseManager {
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) currentAmount = rs.getLong("amount");
             }
-            if (currentAmount <= 0) return 0;
+            if (0 >= currentAmount) return 0;
             int actualToWithdraw = (int) Math.min(currentAmount, (long) requestedAmount);
             try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters SET amount = amount - ? WHERE uuid = ? AND material = ? AND filter_type = 'isf'")) {
                 ps.setInt(1, actualToWithdraw);
@@ -147,22 +168,9 @@ public class DatabaseManager {
         } catch (SQLException e) { e.printStackTrace(); }
         return 0;
     }
-    // Remove o filtro por material (Útil para comandos /remabf, /remasf, /remisf)
-    public boolean removeFilterMaterial(UUID uuid, String type, String material) {
-        try (PreparedStatement ps = connection.prepareStatement(
-                "DELETE FROM player_filters WHERE uuid = ? AND filter_type = ? AND material = ?")) {
-            ps.setString(1, uuid.toString());
-            ps.setString(2, type.toLowerCase());
-            ps.setString(3, material.toUpperCase());
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) { e.printStackTrace(); }
-        return false;
-    }
 
-    // Retorna a quantidade total estocada no ISF para um item
     public long getISFAmount(UUID uuid, String material) {
-        try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT amount FROM player_filters WHERE uuid = ? AND material = ? AND filter_type = 'isf'")) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT amount FROM player_filters WHERE uuid = ? AND material = ? AND filter_type = 'isf'")) {
             ps.setString(1, uuid.toString());
             ps.setString(2, material.toUpperCase());
             ResultSet rs = ps.executeQuery();
@@ -171,4 +179,23 @@ public class DatabaseManager {
         return 0;
     }
 
+    public boolean removeFilterMaterial(UUID uuid, String type, String material) {
+        try (PreparedStatement ps = connection.prepareStatement("DELETE FROM player_filters WHERE uuid = ? AND filter_type = ? AND material = ?")) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, type.toLowerCase());
+            ps.setString(3, material.toUpperCase());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
+
+    public boolean removeFilterBySlot(UUID uuid, String type, int slotId) {
+        try (PreparedStatement ps = connection.prepareStatement("DELETE FROM player_filters WHERE uuid = ? AND filter_type = ? AND slot_id = ?")) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, type.toLowerCase());
+            ps.setInt(3, slotId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
 }
