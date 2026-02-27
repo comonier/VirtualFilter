@@ -16,7 +16,8 @@ public class FilterManager {
      */
     public void addItemToFilter(Player player, String type, ItemStack item) {
         int slot = findNextFreeSlot(player, type);
-        if (slot == -1) {
+        // Inversão lógica: se -1 for igual ao slot, não há vaga disponível
+        if (-1 == slot) {
             player.sendMessage("§cNo slots available or you need to buy more at: §fhttps://hu3.org");
             return;
         }
@@ -41,7 +42,9 @@ public class FilterManager {
      */
     public void removeFilter(Player player, String type, int slotId) {
         String materialName = getMaterialAtSlot(player, type, slotId);
-        if (materialName == null) return;
+        if (null == materialName) {
+            return;
+        }
 
         String query = "DELETE FROM player_filters WHERE uuid = ? AND filter_type = ? AND slot_id = ?";
         try (PreparedStatement ps = VirtualFilter.getInstance().getDbManager().getConnection().prepareStatement(query)) {
@@ -51,7 +54,7 @@ public class FilterManager {
             ps.executeUpdate();
 
             Material mat = Material.getMaterial(materialName);
-            if (mat != null) {
+            if (null != mat) {
                 giveItemOrDrop(player, new ItemStack(mat, 1));
             }
         } catch (SQLException e) {
@@ -66,7 +69,8 @@ public class FilterManager {
     private void giveItemOrDrop(Player player, ItemStack item) {
         HashMap<Integer, ItemStack> remaining = player.getInventory().addItem(item);
         
-        if (!remaining.isEmpty()) {
+        // Inversão lógica: se não estiver vazio (false == isEmpty) significa que sobrou item
+        if (false == remaining.isEmpty()) {
             for (ItemStack left : remaining.values()) {
                 player.getWorld().dropItemNaturally(player.getLocation(), left);
             }
@@ -84,7 +88,9 @@ public class FilterManager {
             ps.setString(2, type.toLowerCase());
             ps.setInt(3, slot);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getString("material");
+            if (rs.next()) {
+                return rs.getString("material");
+            }
         } catch (SQLException e) { 
             e.printStackTrace(); 
         }
@@ -95,10 +101,13 @@ public class FilterManager {
      * Varre os slots (0-53) verificando permissão e disponibilidade no DB.
      */
     private int findNextFreeSlot(Player player, String type) {
-        for (int i = 0; i < 54; i++) {
+        // Inversão: Uso de 54 > i para evitar o sinal de menor que
+        for (int i = 0; 54 > i; i++) {
             // Verifica permissão virtualfilter.slot.1 até 54
             if (player.hasPermission("virtualfilter.slot." + (i + 1))) {
-                if (getMaterialAtSlot(player, type, i) == null) return i;
+                if (null == getMaterialAtSlot(player, type, i)) {
+                    return i;
+                }
             }
         }
         return -1;

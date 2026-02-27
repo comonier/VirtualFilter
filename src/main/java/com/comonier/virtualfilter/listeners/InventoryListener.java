@@ -15,32 +15,41 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class InventoryListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
+        // Correção de símbolo: Cast tradicional
+        if (false == (event.getWhoClicked() instanceof Player)) {
+            return;
+        }
+        Player player = (Player) event.getWhoClicked();
+        
         String title = event.getView().getTitle();
-        if (!title.contains("Filter")) return;
+        if (false == title.contains("Filter")) {
+            return;
+        }
 
-        // Cancela o padrão para evitar roubo de itens técnicos do menu
         event.setCancelled(true);
         
         String typeCode = title.contains("AutoBlock") ? "abf" : (title.contains("InfinityStack") ? "isf" : "asf");
         boolean isISF = typeCode.equals("isf");
 
         int slot = event.getSlot();
-        if (slot < 0 || slot >= 54) return;
+        if (0 > slot || slot >= 54) {
+            return;
+        }
 
         ItemStack cursorItem = event.getCursor();
         ItemStack clickedItem = event.getCurrentItem();
 
-        // --- 1. QUICK-ADD (SHIFT + ESQUERDO no inv de baixo) ---
         if (event.getClickedInventory() == player.getInventory()) {
             if (event.getClick() == ClickType.SHIFT_LEFT) {
                 ItemStack toAdd = event.getCurrentItem();
-                if (toAdd != null && toAdd.getType() != Material.AIR && toAdd.getType().getMaxStackSize() > 1) {
+                if (null != toAdd && toAdd.getType() != Material.AIR && toAdd.getType().getMaxStackSize() > 1) {
                     handleCreation(player, typeCode, toAdd.getType(), -1);
                     FilterMenu.open(player, typeCode);
                 }
@@ -48,18 +57,12 @@ public class InventoryListener implements Listener {
             return;
         }
 
-        // --- 2. CLIQUE NO MENU (PARTE DE CIMA) ---
-        
-        // ESQUERDO: Adicionar, Substituir ou SAQUE MASSIVO (ISF)
         if (event.getClick() == ClickType.LEFT || event.getClick() == ClickType.SHIFT_LEFT) {
-            
-            // CASO A: Saque Massivo (Shift + Clique Esquerdo em item existente no ISF)
             if (event.getClick() == ClickType.SHIFT_LEFT && isISF && isFilterItem(clickedItem)) {
                 String matName = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), typeCode, slot);
-                if (matName != null) {
+                if (null != matName) {
                     VirtualFilter.getInstance().getInfinityManager().withdrawMassive(player, matName);
-                    // Se o estoque zerar após o saque massivo, remove o filtro
-                    if (VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName) <= 0) {
+                    if (0 >= VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName)) {
                         executeDelete(player, typeCode, slot);
                     }
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
@@ -68,34 +71,30 @@ public class InventoryListener implements Listener {
                 return;
             }
 
-            // CASO B: Adicionar/Substituir com item no mouse (Clique Esquerdo Normal)
-            if (cursorItem != null && cursorItem.getType() != Material.AIR) {
-                if (cursorItem.getType().getMaxStackSize() <= 1) return;
-                
+            if (null != cursorItem && cursorItem.getType() != Material.AIR) {
+                if (2 > cursorItem.getType().getMaxStackSize()) {
+                    return;
+                }
                 int allowed = getMaxSlots(player, typeCode);
                 if (slot >= allowed) {
                     player.sendMessage("§cSlot locked!");
                     return;
                 }
-
-                // Devolve o item antigo limpo se estiver substituindo
                 if (isFilterItem(clickedItem)) {
                     player.getInventory().addItem(new ItemStack(clickedItem.getType(), 1));
                 }
-
                 handleCreation(player, typeCode, cursorItem.getType(), slot);
-                player.setItemOnCursor(null); // Consome o item do mouse
+                player.setItemOnCursor(null);
                 FilterMenu.open(player, typeCode);
                 return;
             }
         }
 
-        // DIREITO: Saque Simples (1 Pack no ISF)
         if (event.getClick() == ClickType.RIGHT && isISF && isFilterItem(clickedItem)) {
             String matName = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), typeCode, slot);
-            if (matName != null) {
+            if (null != matName) {
                 VirtualFilter.getInstance().getInfinityManager().withdrawPack(player, matName, slot);
-                if (VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName) <= 0) {
+                if (0 >= VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName)) {
                     executeDelete(player, typeCode, slot);
                 }
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
@@ -104,8 +103,18 @@ public class InventoryListener implements Listener {
             return;
         }
 
-        // SHIFT + DIREITO: Deletar Filtro (Universal)
         if (event.getClick() == ClickType.SHIFT_RIGHT && isFilterItem(clickedItem)) {
+            if (isISF) {
+                String matName = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), typeCode, slot);
+                if (null != matName) {
+                    long currentStock = VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName);
+                    if (currentStock > 0) {
+                        player.sendMessage("§c§lAVISO: §fVocê não pode deletar um filtro com itens estocados!");
+                        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
+                        return;
+                    }
+                }
+            }
             executeDelete(player, typeCode, slot);
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
             FilterMenu.open(player, typeCode);
@@ -113,50 +122,50 @@ public class InventoryListener implements Listener {
     }
 
     private boolean isFilterItem(ItemStack item) {
-        return item != null && item.getType() != Material.AIR && !item.getType().name().contains("GLASS_PANE");
+        return null != item && item.getType() != Material.AIR && false == item.getType().name().contains("GLASS_PANE");
     }
 
     private void handleCreation(Player player, String type, Material mat, int specificSlot) {
-        // Lógica de auto-mesclagem
         int existingSlot = -1;
-        for (int i = 0; i < 54; i++) {
+        for (int i = 0; 54 > i; i++) {
             String m = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, i);
-            if (m != null && m.equalsIgnoreCase(mat.name())) {
+            if (null != m && m.equalsIgnoreCase(mat.name())) {
                 existingSlot = i;
                 break;
             }
         }
 
-        if (existingSlot != -1) {
+        if (-1 != existingSlot) {
             if (type.equals("isf")) {
                 long toAdd = 0;
                 for (ItemStack invItem : player.getInventory().getStorageContents()) {
-                    if (invItem != null && invItem.getType() == mat) {
+                    if (null != invItem && invItem.getType() == mat) {
                         toAdd += invItem.getAmount();
                         invItem.setAmount(0);
                     }
                 }
-                VirtualFilter.getInstance().getDbManager().addAmount(player.getUniqueId(), mat.name(), (int) toAdd);
+                VirtualFilter.getInstance().getDbManager().addAmount(player.getUniqueId(), mat.name(), toAdd);
                 player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
             }
             return;
         }
 
         int targetSlot = specificSlot;
-        if (targetSlot == -1) {
+        if (-1 == targetSlot) {
             int allowed = getMaxSlots(player, type);
-            for (int i = 0; i < allowed; i++) {
-                if (VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, i) == null) {
-                    targetSlot = i; break;
+            for (int i = 0; allowed > i; i++) {
+                if (null == VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), type, i)) {
+                    targetSlot = i; 
+                    break;
                 }
             }
         }
 
-        if (targetSlot != -1) {
+        if (-1 != targetSlot) {
             long total = 0;
             if (type.equals("isf")) {
                 for (ItemStack invItem : player.getInventory().getStorageContents()) {
-                    if (invItem != null && invItem.getType() == mat) {
+                    if (null != invItem && invItem.getType() == mat) {
                         total += invItem.getAmount();
                         invItem.setAmount(0);
                     }
@@ -168,23 +177,29 @@ public class InventoryListener implements Listener {
     }
 
     private int getMaxSlots(Player player, String type) {
-        if (player.isOp() || player.hasPermission("virtualfilter.admin") || player.hasPermission("*")) return 54;
+        if (player.isOp() || player.hasPermission("virtualfilter.admin") || player.hasPermission("*")) {
+            return 54;
+        }
         int max = VirtualFilter.getInstance().getConfig().getInt("default-slots." + type, 1);
         for (PermissionAttachmentInfo permission : player.getEffectivePermissions()) {
             String perm = permission.getPermission().toLowerCase();
-            if (perm.startsWith("virtualfilter." + type + ".")) {
+            String prefix = "virtualfilter." + type + ".";
+            if (perm.startsWith(prefix)) {
                 try {
                     int v = Integer.parseInt(perm.substring(perm.lastIndexOf(".") + 1));
-                    if (v > max) max = v;
+                    if (v > max) {
+                        max = v;
+                    }
                 } catch (Exception ignored) {}
             }
         }
-        return Math.min(max, 54);
+        if (max >= 54) return 54;
+        return max;
     }
 
     private void saveItem(Player p, String type, int slot, String mat, long amount) {
-        try (PreparedStatement ps = VirtualFilter.getInstance().getDbManager().getConnection().prepareStatement(
-                "INSERT OR REPLACE INTO player_filters (uuid, filter_type, slot_id, material, amount) VALUES (?, ?, ?, ?, ?)")) {
+        String query = "INSERT OR REPLACE INTO player_filters (uuid, filter_type, slot_id, material, amount) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = VirtualFilter.getInstance().getDbManager().getConnection().prepareStatement(query)) {
             ps.setString(1, p.getUniqueId().toString());
             ps.setString(2, type);
             ps.setInt(3, slot);
@@ -195,8 +210,8 @@ public class InventoryListener implements Listener {
     }
 
     private void executeDelete(Player p, String type, int slot) {
-        try (PreparedStatement ps = VirtualFilter.getInstance().getDbManager().getConnection().prepareStatement(
-                "DELETE FROM player_filters WHERE uuid = ? AND filter_type = ? AND slot_id = ?")) {
+        String query = "DELETE FROM player_filters WHERE uuid = ? AND filter_type = ? AND slot_id = ?";
+        try (PreparedStatement ps = VirtualFilter.getInstance().getDbManager().getConnection().prepareStatement(query)) {
             ps.setString(1, p.getUniqueId().toString());
             ps.setString(2, type);
             ps.setInt(3, slot);

@@ -1,37 +1,55 @@
-# ==========================================================
-#             VirtualFilter - Messages v1.4
-# ==========================================================
-
 en:
   prefix: "§6§l[VirtualFilter] "
-  added: "§aItem §f%item% §aadded to %type%."
-  removed: "§aRemoved §f%item% §afrom %type% filter."
-  replaced: "§aFilter in slot %slot% replaced by §f%item%."
-  no_permission: "§cNo permission."
-  inv_full: "§cYour inventory is full!"
+  added: "§aItem §f%item% §aadded to %type% filter (Slot: %slot%)."
+  removed: "§aRemoved §f%item% §afrom %type% filter (Reorganized)."
+  no_permission: "§cNo permission to use this command."
+  inv_full: "§cYour inventory is full! Item dropped on the ground."
   withdraw: "§aWithdrew %amount%x %item% from ISF storage."
-  no_item_isf: "§cNo %item% found in your ISF storage."
   asf_actionbar: "§a+$%price% §7(Sold %amount%x %item%)"
-  isf_actionbar: "§b+%amount% §7%item% (Stored in ISF)"
   isf_refill: "§6[VirtualFilter] §f%item% §7refilled from ISF storage!"
-  autoloot_on: "§7AutoLoot is now §aENABLED"
-  autoloot_off: "§7AutoLoot is now §cDISABLED"
-  autofill_on: "§7AutoFillHand is now §aENABLED"
-  autofill_off: "§7AutoFillHand is now §cDISABLED"
+  
+  # --- Automação ---
+  autoloot_on: "§7AutoLoot: §aENABLED"
+  autoloot_off: "§7AutoLoot: §cDISABLED"
+  autofill_on: "§7AutoFillHand: §aENABLED"
+  autofill_off: "§7AutoFillHand: §cDISABLED"
+  
+  # --- Relatórios e Debug ---
+  chest_report_title: "§6[VirtualFilter] Collection Report:"
+  chest_debug_on: "§6[VirtualFilter] §7Collection alerts: §aENABLED"
+  chest_debug_off: "§6[VirtualFilter] §7Collection alerts: §cDISABLED"
+  
+  # --- Comandos Extras ---
+  lang_changed: "§aLanguage changed to English."
+  actionbar_on: "§aAction Bar notifications: ENABLED"
+  actionbar_off: "§cAction Bar notifications: DISABLED"
+  help_header: "§6§l--- VirtualFilter Help ---"
+  help_line: "§e/%cmd% §7- %desc%"
 
 pt:
   prefix: "§6§l[VirtualFilter] "
-  added: "§aItem §f%item% §aadicionado ao %type%."
-  removed: "§aRemovido §f%item% §ado filtro %type%."
-  replaced: "§aFiltro no slot %slot% substituído por §f%item%."
-  no_permission: "§cSem permissão."
-  inv_full: "§cSeu inventário está cheio!"
+  added: "§aItem §f%item% §aadicionado ao filtro %type% (Slot: %slot%)."
+  removed: "§aRemovido §f%item% §ado filtro %type% (Reorganizado)."
+  no_permission: "§cVocê não tem permissão para usar este comando."
+  inv_full: "§cSeu inventário está cheio! O item caiu no chão."
   withdraw: "§aRetirado %amount%x %item% do estoque ISF."
-  no_item_isf: "§cItem %item% não encontrado no seu estoque ISF."
   asf_actionbar: "§a+$%price% §7(Vendido %amount%x %item%)"
-  isf_actionbar: "§b+%amount% §7%item% (Estocado no ISF)"
   isf_refill: "§6[VirtualFilter] §f%item% §7reposto do estoque ISF!"
-  autoloot_on: "§7AutoLoot está agora §aATIVADO"
-  autoloot_off: "§7AutoLoot está agora §cDESATIVADO"
-  autofill_on: "§7AutoFillHand está agora §aATIVADO"
-  autofill_off: "§7AutoFillHand está agora §cDESATIVADO"
+  
+  # --- Automação ---
+  autoloot_on: "§7AutoLoot: §aATIVADO"
+  autoloot_off: "§7AutoLoot: §cDESATIVADO"
+  autofill_on: "§7AutoFillHand: §aATIVADO"
+  autofill_off: "§7AutoFillHand: §cDESATIVADO"
+  
+  # --- Relatórios e Debug ---
+  chest_report_title: "§6[VirtualFilter] Relatório de Coleta:"
+  chest_debug_on: "§6[VirtualFilter] §7Aviso de coleta: §aATIVADO"
+  chest_debug_off: "§6[VirtualFilter] §7Aviso de coleta: §cDESATIVADO"
+  
+  # --- Comandos Extras ---
+  lang_changed: "§aIdioma alterado para Português."
+  actionbar_on: "§aNotificações na Action Bar: ATIVADAS"
+  actionbar_off: "§cNotificações na Action Bar: DESATIVADAS"
+  help_header: "§6§l--- Ajuda VirtualFilter ---"
+  help_line: "§e/%cmd% §7- %desc%"

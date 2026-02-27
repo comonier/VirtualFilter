@@ -1,18 +1,45 @@
 # ==========================================================
-#             VirtualFilter - Configuração v1.5
+#             VirtualFilter - Configuração v1.6
 # ==========================================================
+
+# Idioma padrão do servidor (en/pt)
 language: en
 
-# Default slots for every player
+# Tipo de armazenamento (Atualmente apenas SQLITE é suportado nesta versão)
+storage-type: SQLITE
+
+# --- Configurações de Slots ---
+# Slots iniciais para jogadores sem permissões específicas
 default-slots:
   abf: 1
   isf: 1
   asf: 1
 
-# Define se o aviso de baú virá ativado por padrão
+# --- Configurações de Automação ---
+# Define se o AutoLoot (AL) vem ativado para novos jogadores
+default-autoloot-enabled: false
+
+# Define se o AutoFillHand (Reposição de itens na mão) vem ativado
+default-autofill-enabled: true
+
+# --- Proteção e Segurança ---
+# Tempo em segundos que um item fica protegido para o dono (Mineração/Mobs)
+# Após esse tempo, qualquer jogador pode coletar.
+loot-protection-seconds: 10
+
+# --- Relatórios e Notificações ---
+# Define se o aviso de relatório de baús (vfcb) vem ativado por padrão
 default-chest-debug-enabled: true
 
-# Notificações de Venda na Action Bar
+# Notificações de Venda (AutoSell) na Action Bar
 default-actionbar-enabled: true
 
-storage-type: SQLITE
+# --- Integrações Externas ---
+# Se o plugin deve aguardar drops de outros plugins (como mcMMO)
+# Recomendado manter em 'true' para garantir bônus de mineração/escavação.
+wait-for-extra-drops: true
+
+# Configurações do ShopGUI+
+shopgui-integration:
+  enabled: true
+  fallback-price: 0.1

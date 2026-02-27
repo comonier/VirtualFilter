@@ -29,13 +29,14 @@ public class VirtualFilter extends JavaPlugin {
         ShopGUIHook.loadPrices();
 
         // 2. Integração com Economia (Vault)
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+        // Lógica inversa: Se o plugin Vault for nulo
+        if (null == getServer().getPluginManager().getPlugin("Vault")) {
             getLogger().severe("Vault not found! AutoSell feature will not pay players.");
         } else {
             setupEconomy();
         }
 
-        // 3. Banco de Dados e Gerenciadores
+        // 3. Banco de Dados e Gerenciadores (Ordem crítica para evitar null)
         this.dbManager = new DatabaseManager();
         this.dbManager.setupDatabase();
         this.infinityManager = new InfinityManager();
@@ -43,7 +44,7 @@ public class VirtualFilter extends JavaPlugin {
         // 4. Registro de Comandos (Centralizado no FilterCommands)
         FilterCommands cmd = new FilterCommands();
         
-        // Menus e Configurações
+        // Menus e Configurações Gerais
         getCommand("abf").setExecutor(cmd);
         getCommand("isf").setExecutor(cmd);
         getCommand("asf").setExecutor(cmd);
@@ -52,11 +53,11 @@ public class VirtualFilter extends JavaPlugin {
         getCommand("vfhelp").setExecutor(cmd);
         getCommand("vfreload").setExecutor(cmd);
         
-        // Funções de Automação
+        // Funções de Automação (AutoLoot e AutoFillHand)
         getCommand("al").setExecutor(cmd); 
         getCommand("afh").setExecutor(cmd);
 
-        // Adição e Remoção (v1.4+)
+        // Adição e Remoção de Itens (Filtros Individuais)
         getCommand("addabf").setExecutor(cmd);
         getCommand("addisf").setExecutor(cmd);
         getCommand("addasf").setExecutor(cmd);
@@ -65,37 +66,43 @@ public class VirtualFilter extends JavaPlugin {
         getCommand("remasf").setExecutor(cmd);
         getCommand("isg").setExecutor(cmd);
 
-        // NOVO v1.5: Comando de Debug de Baús (vfcb)
+        // NOVO v1.6: Comando de Debug de Baús (vfcb) para relatório de coletas
         getCommand("vfcb").setExecutor(cmd);
 
-        // 5. Registro de Listeners (Eventos)
+        // 5. Registro de Listeners (Eventos do Servidor)
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
         getServer().getPluginManager().registerEvents(new FilterProcessor(), this);
         getServer().getPluginManager().registerEvents(new AutoFillListener(), this);
 
-        getLogger().info("VirtualFilter v1.5 enabled successfully! Chest Guard system active.");
+        getLogger().info("VirtualFilter v1.6 enabled successfully! Chest Guard & mcMMO support active.");
     }
 
     private void loadMessages() {
         File file = new File(getDataFolder(), "messages.yml");
-        // LOGICA INVERSA: Se o arquivo nao existir
-        if (false == file.exists()) saveResource("messages.yml", false);
+        // Lógica inversa: Se o arquivo não existe (false == exists)
+        if (false == file.exists()) {
+            saveResource("messages.yml", false);
+        }
         messages = YamlConfiguration.loadConfiguration(file);
     }
 
     public String getMsg(String playerLang, String path) {
-        // Fallback seguro: se playerLang for nulo, usa o da config
+        // Fallback seguro: se playerLang for nulo, busca o idioma padrão da config
         String lang = (null == playerLang) ? getConfig().getString("language", "en") : playerLang;
         String msg = messages.getString(lang + "." + path);
         
-        if (null == msg) return "§cMessage not found: " + path;
+        if (null == msg) {
+            return "§cMessage not found: " + path;
+        }
         return msg.replace("&", "§");
     }
 
     private boolean setupEconomy() {
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        // LOGICA INVERSA: Se o provedor for nulo
-        if (null == rsp) return false;
+        // Lógica inversa: Se o provedor for nulo, retorna falso
+        if (null == rsp) {
+            return false;
+        }
         econ = rsp.getProvider();
         return null != econ;
     }
@@ -109,9 +116,10 @@ public class VirtualFilter extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        getLogger().info("VirtualFilter v1.5 disabled.");
+        getLogger().info("VirtualFilter v1.6 disabled.");
     }
 
+    // Getters Estáticos e de Instância para acesso global
     public static VirtualFilter getInstance() { return instance; }
     public static Economy getEconomy() { return econ; }
     public DatabaseManager getDbManager() { return dbManager; }
