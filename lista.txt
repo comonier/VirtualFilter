@@ -1,0 +1,120 @@
+Listagem de caminhos de pasta
+O n£mero de s‚rie do volume ‚ 44E2-1797
+C:.
+|   .gitignore
+|   estrutura.txt
+|   LICENSE
+|   lista.txt
+|   pom.xml
+|   README.md
+|   vf.jpg
+|   
++---.vscode
+|       settings.json
+|       
++---src
+|   \---main
+|       +---java
+|       |   \---com
+|       |       \---comonier
+|       |           \---virtualfilter
+|       |               |   VirtualFilter.java
+|       |               |   
+|       |               +---commands
+|       |               |       AddFilterCommand.java
+|       |               |       AdminCommands.java
+|       |               |       AutomationCommands.java
+|       |               |       HelpCommand.java
+|       |               |       MenuCommands.java
+|       |               |       RemFilterCommand.java
+|       |               |       StorageCommands.java
+|       |               |       
+|       |               +---database
+|       |               |       DatabaseCore.java
+|       |               |       FilterRepository.java
+|       |               |       SettingsRepository.java
+|       |               |       
+|       |               +---integration
+|       |               |       ShopGUIHook.java
+|       |               |       
+|       |               +---listeners
+|       |               |       AutoFillListener.java
+|       |               |       MenuInteractionListener.java
+|       |               |       PlayerInventoryListener.java
+|       |               |       
+|       |               +---manager
+|       |               |   \---processor
+|       |               |           BlockLootListener.java
+|       |               |           EntityLootListener.java
+|       |               |           FilterEngine.java
+|       |               |           ReportManager.java
+|       |               |           
+|       |               \---menu
+|       |                       FilterMenu.java
+|       |                       
+|       \---resources
+|               config.yml
+|               messages.yml
+|               plugin.yml
+|               prices.yml
+|               
+\---target
+    |   VirtualFilter-1.7.jar
+    |   
+    +---classes
+    |   |   config.yml
+    |   |   messages.yml
+    |   |   plugin.yml
+    |   |   prices.yml
+    |   |   
+    |   \---com
+    |       \---comonier
+    |           \---virtualfilter
+    |               |   VirtualFilter.class
+    |               |   
+    |               +---commands
+    |               |       AddFilterCommand.class
+    |               |       AdminCommands.class
+    |               |       AutomationCommands.class
+    |               |       HelpCommand.class
+    |               |       MenuCommands.class
+    |               |       RemFilterCommand.class
+    |               |       StorageCommands.class
+    |               |       
+    |               +---database
+    |               |       DatabaseCore.class
+    |               |       FilterRepository.class
+    |               |       SettingsRepository.class
+    |               |       
+    |               +---integration
+    |               |       ShopGUIHook.class
+    |               |       
+    |               +---listeners
+    |               |       AutoFillListener.class
+    |               |       MenuInteractionListener.class
+    |               |       PlayerInventoryListener.class
+    |               |       
+    |               +---manager
+    |               |   \---processor
+    |               |           BlockLootListener.class
+    |               |           EntityLootListener.class
+    |               |           FilterEngine.class
+    |               |           ReportManager.class
+    |               |           
+    |               \---menu
+    |                       FilterMenu.class
+    |                       
+    +---generated-sources
+    |   \---annotations
+    +---generated-test-sources
+    |   \---test-annotations
+    +---maven-archiver
+    |       pom.properties
+    |       
+    \---maven-status
+        \---maven-compiler-plugin
+            \---compile
+                \---default-compile
+                        createdFiles.lst
+                        inputFiles.lst
+                        

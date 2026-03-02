@@ -16,7 +16,8 @@ public class FilterMenu {
 
     public static void open(Player player, String type) {
         String typeLower = type.toLowerCase();
-        // Switch para títulos personalizados conforme o menu aberto
+        
+        // Títulos personalizados
         String title = switch (typeLower) {
             case "abf" -> "§8§lAutoBlockFilter";
             case "isf" -> "§8§lInfinityStackFilter";
@@ -24,7 +25,6 @@ public class FilterMenu {
             default -> "§8§lFilter";
         };
 
-        // Inventário padrão de 54 slots (6 linhas)
         Inventory inv = Bukkit.createInventory(null, 54, title);
         int allowedSlots = getMaxSlots(player, typeLower);
 
@@ -32,8 +32,8 @@ public class FilterMenu {
         for (int i = 0; 54 > i; i++) {
             int displaySlot = i + 1;
             
+            // Se o slot estiver bloqueado por permissão
             if (i >= allowedSlots) {
-                // Representação visual de slot bloqueado (Rank insuficiente)
                 ItemStack locked = new ItemStack(Material.RED_STAINED_GLASS_PANE);
                 ItemMeta meta = locked.getItemMeta();
                 if (null != meta) {
@@ -46,8 +46,10 @@ public class FilterMenu {
                     inv.setItem(i, locked);
                 }
             } else {
-                // Busca no banco de dados se há um material registrado para este slot
-                String matName = VirtualFilter.getInstance().getDbManager().getMaterialAtSlot(player.getUniqueId(), typeLower, i);
+                // Missão 2: Busca o material no banco (FilterRepository)
+                // Se um slot foi removido e os outros voltaram uma casa, o ID aqui já estará atualizado
+                String matName = VirtualFilter.getInstance().getFilterRepo().getMaterialAtSlot(player.getUniqueId(), typeLower, i);
+                
                 if (null != matName) {
                     Material mat = Material.getMaterial(matName);
                     if (null != mat) {
@@ -57,19 +59,14 @@ public class FilterMenu {
                             meta.setDisplayName("§aSlot " + displaySlot);
                             List<String> lore = new ArrayList<>();
                             
-                            // Lógica específica para o menu de Estoque Infinito
                             if (typeLower.equals("isf")) {
-                                long amount = VirtualFilter.getInstance().getInfinityManager().getAmount(player.getUniqueId(), matName);
-                                // Formatação numérica com separador (ex: 1.000.000)
+                                long amount = VirtualFilter.getInstance().getFilterRepo().getISFAmount(player.getUniqueId(), matName);
                                 lore.add("§7Stored Amount: §f" + String.format("%,d", amount));
                                 lore.add("");
                                 lore.add("§e§lRight-Click §7to withdraw 1 pack.");
                                 lore.add("§6§lShift + Left-Click §7to withdraw ALL possible.");
                                 lore.add("§c§lShift + Right-Click §7to remove filter.");
-                                lore.add("§4§lWARNING: §cRemoving this filter will");
-                                lore.add("§cpermanently delete the stored stock!");
                             } else {
-                                // Lore simplificada para AutoBlock e AutoSell
                                 lore.add("§8Material: " + mat.name());
                                 lore.add("§c§lShift + Right-Click §7to remove filter.");
                             }
@@ -86,15 +83,12 @@ public class FilterMenu {
     }
 
     private static int getMaxSlots(Player player, String type) {
-        // Bypass total para operadores ou permissão curinga
         if (player.isOp() || player.hasPermission("virtualfilter.admin") || player.hasPermission("*")) {
             return 54;
         }
         
-        // Pega o valor base definido no arquivo config.yml
         int max = VirtualFilter.getInstance().getConfig().getInt("default-slots." + type, 1);
         
-        // Varredura de permissões dinâmicas (ex: virtualfilter.isf.27)
         for (PermissionAttachmentInfo permission : player.getEffectivePermissions()) {
             String perm = permission.getPermission().toLowerCase();
             String prefix = "virtualfilter." + type + ".";
@@ -102,7 +96,6 @@ public class FilterMenu {
             if (perm.startsWith(prefix)) {
                 try {
                     int v = Integer.parseInt(perm.substring(perm.lastIndexOf(".") + 1));
-                    // Mantém sempre o maior valor encontrado entre as permissões
                     if (v > max) {
                         max = v;
                     }
@@ -110,10 +103,7 @@ public class FilterMenu {
             }
         }
         
-        // Garante que o retorno nunca ultrapasse o limite físico do menu (54 slots)
-        if (max >= 54) {
-            return 54;
-        }
+        if (max >= 54) return 54;
         return max;
     }
 }

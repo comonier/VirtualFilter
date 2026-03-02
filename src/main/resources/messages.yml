@@ -8,18 +8,22 @@ en:
   asf_actionbar: "§a+$%price% §7(Sold %amount%x %item%)"
   isf_refill: "§6[VirtualFilter] §f%item% §7refilled from ISF storage!"
   
-  # --- Automação ---
+  # --- Bedrock & Massive Actions ---
+  massive_withdraw: "§aMassive withdraw: §f%amount%x §aitems retrieved."
+  inventory_full_isf: "§cInventory full! Excess items returned to ISF storage."
+  delete_blocked_isf: "§c§lERROR: §fEmpty your ISF storage before removing this filter!"
+  
+  # --- Automation & Logs ---
   autoloot_on: "§7AutoLoot: §aENABLED"
   autoloot_off: "§7AutoLoot: §cDISABLED"
   autofill_on: "§7AutoFillHand: §aENABLED"
   autofill_off: "§7AutoFillHand: §cDISABLED"
+  logs_own_on: "§7Personal Logs: §aENABLED"
+  logs_own_off: "§7Personal Logs: §cDISABLED"
+  logs_all_on: "§7Nearby Logs (Others): §aENABLED"
+  logs_all_off: "§7Nearby Logs (Others): §cDISABLED"
   
-  # --- Relatórios e Debug ---
-  chest_report_title: "§6[VirtualFilter] Collection Report:"
-  chest_debug_on: "§6[VirtualFilter] §7Collection alerts: §aENABLED"
-  chest_debug_off: "§6[VirtualFilter] §7Collection alerts: §cDISABLED"
-  
-  # --- Comandos Extras ---
+  # --- Extra Commands ---
   lang_changed: "§aLanguage changed to English."
   actionbar_on: "§aAction Bar notifications: ENABLED"
   actionbar_off: "§cAction Bar notifications: DISABLED"
@@ -36,16 +40,20 @@ pt:
   asf_actionbar: "§a+$%price% §7(Vendido %amount%x %item%)"
   isf_refill: "§6[VirtualFilter] §f%item% §7reposto do estoque ISF!"
   
-  # --- Automação ---
+  # --- Bedrock & Massive Actions ---
+  massive_withdraw: "§aSaque Massivo: §f%amount%x §aitens retirados."
+  inventory_full_isf: "§cInventário cheio! O excesso voltou para o estoque ISF."
+  delete_blocked_isf: "§c§lERRO: §fEsvazie o estoque ISF antes de remover este filtro!"
+  
+  # --- Automação & Logs ---
   autoloot_on: "§7AutoLoot: §aATIVADO"
   autoloot_off: "§7AutoLoot: §cDESATIVADO"
   autofill_on: "§7AutoFillHand: §aATIVADO"
   autofill_off: "§7AutoFillHand: §cDESATIVADO"
-  
-  # --- Relatórios e Debug ---
-  chest_report_title: "§6[VirtualFilter] Relatório de Coleta:"
-  chest_debug_on: "§6[VirtualFilter] §7Aviso de coleta: §aATIVADO"
-  chest_debug_off: "§6[VirtualFilter] §7Aviso de coleta: §cDESATIVADO"
+  logs_own_on: "§7Logs Próprias: §aATIVADO"
+  logs_own_off: "§7Logs Próprias: §cDESATIVADO"
+  logs_all_on: "§7Logs de Terceiros: §aATIVADO"
+  logs_all_off: "§7Logs de Terceiros: §cDESATIVADO"
   
   # --- Comandos Extras ---
   lang_changed: "§aIdioma alterado para Português."

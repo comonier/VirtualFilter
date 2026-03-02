@@ -1,45 +1,45 @@
 # ==========================================================
-#             VirtualFilter - Configuração v1.6
+#             VirtualFilter - Configuracao v1.6
 # ==========================================================
 
-# Idioma padrão do servidor (en/pt)
+# Idioma padrao do servidor (en/pt)
 language: en
 
-# Tipo de armazenamento (Atualmente apenas SQLITE é suportado nesta versão)
+# Tipo de armazenamento (SQLITE)
 storage-type: SQLITE
 
-# --- Configurações de Slots ---
-# Slots iniciais para jogadores sem permissões específicas
+# --- Configuracoes de Slots ---
+# Slots iniciais para jogadores sem permissoes especificas
 default-slots:
   abf: 1
   isf: 1
   asf: 1
 
-# --- Configurações de Automação ---
+# --- Configuracoes de Automacao ---
 # Define se o AutoLoot (AL) vem ativado para novos jogadores
 default-autoloot-enabled: false
 
-# Define se o AutoFillHand (Reposição de itens na mão) vem ativado
+# Define se o AutoFillHand (Reposicao de itens na mao) vem ativado
 default-autofill-enabled: true
 
-# --- Proteção e Segurança ---
-# Tempo em segundos que um item fica protegido para o dono (Mineração/Mobs)
-# Após esse tempo, qualquer jogador pode coletar.
+# --- Protecao e Seguranca ---
+# Tempo em segundos que um item fica protegido para o dono (Mineracao/Mobs)
+# Apos esse tempo, qualquer jogador pode coletar.
 loot-protection-seconds: 10
 
-# --- Relatórios e Notificações ---
-# Define se o aviso de relatório de baús (vfcb) vem ativado por padrão
+# --- Relatorios e Notificacoes ---
+# Define se o aviso de relatorio de baus (vfcb) vem ativado por padrao
 default-chest-debug-enabled: true
 
-# Notificações de Venda (AutoSell) na Action Bar
+# Notificacoes de Venda (AutoSell) na Action Bar
 default-actionbar-enabled: true
 
-# --- Integrações Externas ---
+# --- Integracoes Externas ---
 # Se o plugin deve aguardar drops de outros plugins (como mcMMO)
-# Recomendado manter em 'true' para garantir bônus de mineração/escavação.
+# Recomendado manter em 'true' para garantir bonus de mineracao/escavacao.
 wait-for-extra-drops: true
 
-# Configurações do ShopGUI+
+# Configuracoes do ShopGUI+
 shopgui-integration:
   enabled: true
   fallback-price: 0.1

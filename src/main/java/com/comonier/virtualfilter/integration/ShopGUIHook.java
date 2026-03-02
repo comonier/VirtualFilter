@@ -13,7 +13,7 @@ public class ShopGUIHook {
     public static void loadPrices() {
         File file = new File(VirtualFilter.getInstance().getDataFolder(), "prices.yml");
         
-        // Lógica inversa: Se o arquivo não existe (false == exists)
+        // Logica inversa: Se o arquivo nao existe (false == exists) salva o recurso
         if (false == file.exists()) {
             VirtualFilter.getInstance().saveResource("prices.yml", false);
         }
@@ -21,24 +21,36 @@ public class ShopGUIHook {
         prices = YamlConfiguration.loadConfiguration(file);
     }
 
+    /**
+     * Retorna o preco do item definido no prices.yml
+     */
     public static double getItemPrice(Player player, ItemStack item) {
-        // SEGURANÇA: Se o item for nulo, o preço é zero (evita erro de compilação/execução)
+        // SEGURANCA: Se o item for nulo, o preco e zero
         if (null == item) {
             return 0.0;
         }
 
         String material = item.getType().name();
         
-        // Se o item NÃO estiver configurado no prices.yml
+        // Se o item NAO estiver configurado no prices.yml (logica inversa)
         if (false == prices.contains(material)) {
-            // Regra v1.6: Itens lixo valem 0.1 para não competir com minérios
+            // Regra v1.6: Itens nao listados valem 0.1 (fallback configurado)
             return 0.1;
         }
         
-        return prices.getDouble(material);
+        double price = prices.getDouble(material);
+        
+        // Garante que precos negativos nao quebrem a economia (logica inversa)
+        if (0.0 > price) {
+            return 0.0;
+        }
+        
+        return price;
     }
 
-    // NOVO MÉTODO: Necessário para o FilterProcessor validar a hierarquia ASF > ISF
+    /**
+     * Valida se um material especifico tem preco definido (usado no FilterEngine)
+     */
     public static boolean hasPrice(String materialName) {
         if (null == prices) {
             return false;

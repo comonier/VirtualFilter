@@ -1,5 +1,5 @@
 name: VirtualFilter
-version: 1.6
+version: 1.7
 main: com.comonier.virtualfilter.VirtualFilter
 api-version: 1.21
 depend: [Vault]
@@ -13,19 +13,19 @@ commands:
   asf:
     description: Abre o menu do AutoSell.
   addabf:
-    description: Adiciona o item da mão ao AutoBlock.
+    description: Adiciona o item da mao ao AutoBlock.
   addisf:
-    description: Adiciona o item da mão ao InfinityStack.
+    description: Adiciona o item da mao ao InfinityStack.
   addasf:
-    description: Adiciona o item da mão ao AutoSell.
+    description: Adiciona o item da mao ao AutoSell.
   remabf:
-    description: Remove o item da mão ou por slot do AutoBlock.
+    description: Remove o item da mao ou por slot do AutoBlock.
     aliases: [rabf]
   remisf:
-    description: Remove o item da mão ou por slot do InfinityStack.
+    description: Remove o item da mao ou por slot do InfinityStack.
     aliases: [risf]
   remasf:
-    description: Remove o item da mão ou por slot do AutoSell.
+    description: Remove o item da mao ou por slot do AutoSell.
     aliases: [rasf]
   isg:
     description: Saca itens do seu estoque ISF por ID do slot.
@@ -34,9 +34,12 @@ commands:
     description: Ativa/Desativa o AutoLoot.
   afh:
     description: Ativa/Desativa o AutoFillHand (Busca no ISF).
-  vfcb:
-    description: Ativa/Desativa o relatório de quebra de baús.
-    aliases: [chestdebug]
+  lo:
+    description: Ativa/Desativa a visualizacao das suas proprias logs de loot.
+    aliases: [vflogsown]
+  la:
+    description: Ativa/Desativa a visualizacao das logs de loot de outros jogadores proximos.
+    aliases: [vflogsall]
   vfat:
     description: Alterna avisos na Action Bar.
   vflang:
@@ -45,14 +48,11 @@ commands:
     description: Mostra o menu de ajuda.
     aliases: [vf, vfilter]
   vfreload:
-    description: Recarrega as configurações.
+    description: Recarrega as configuracoes.
     permission: virtualfilter.admin
-    permission-message: §cSem permissão.
+    permission-message: §cSem permissao.
 
 permissions:
   virtualfilter.admin:
     description: Permissao para usar o reload do plugin.
     default: op
-  virtualfilter.chestdebug:
-    description: Permissao para ver o relatorio de baus.
-    default: true

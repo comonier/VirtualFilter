@@ -3,21 +3,20 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.comonier</groupId>
     <artifactId>VirtualFilter</artifactId>
-    <version>1.6</version>
+    <version>1.7</version>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-
     <repositories>
-        <!-- Repositório do Paper (Estável) -->
+        <!-- Repositorio do Paper oficial -->
         <repository>
             <id>papermc</id>
             <url>https://repo.papermc.io</url>
         </repository>
-        <!-- Repositório para baixar o Vault -->
+        <!-- Repositorio JitPack para o Vault -->
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
@@ -25,18 +24,18 @@
     </repositories>
 
     <dependencies>
-        <!-- API do Paper (Base do Minecraft) -->
+        <!-- API do Paper para Minecraft 1.21.1 -->
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
             <version>1.21.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <!-- API do Vault (Sistema de Dinheiro) -->
+        <!-- API do Vault para Economia -->
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
+            <version>1.7.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -47,6 +46,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
+                <configuration>
+                    <release>21</release>
+                </configuration>
             </plugin>
         </plugins>
         <resources>

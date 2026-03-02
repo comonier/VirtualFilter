@@ -1,92 +1,42 @@
-<div align="center">
+# 💎 VirtualFilter v1.7 (Modular Edition)
 
-# 💎 VirtualFilter v1.6
-**Professional Independent Virtual Filtering System**
+**VirtualFilter** is an advanced item filtering and virtual storage system, fully optimized for **Paper 1.21.1** servers with complete support for **Bedrock (GeyserMC)** players.
 
-**Support:** Minecraft 1.21+ (Tested on **1.21.1**)
-**Test Server:** `hu3.org` (Java & Bedrock - Default Ports)
+## 🚀 What's New in v1.7
+- **Bedrock Accessibility:** Redesigned withdrawal and addition commands for players without mouse shortcuts (Shift/Right-click).
+- **Auto-Shift (Mission 2):** Automatic slot reorganization. When a filter is removed, subsequent filters occupy the empty space, eliminating gaps.
+- **Smart Merge:** Add items to existing filters with one click (Shift+Left-click) to add to stock instantly.
+- **Independent Logs:** Full control over what you see in chat. Separate options for personal logs and nearby player logs.
+- **Total Alert:** Visual and sound notifications (Villager No) for full inventory across all platforms.
 
----
+## 🎮 Player Commands
 
-## 🛡️ Chest Guard System (v1.6)
-**NEVER lose an item.** When breaking containers (chests, hoppers, etc.) with **AutoLoot** enabled or disabled, the system processes items through security layers:
-1. **Virtual Filters:** Top priority for **ASF** (AutoSell) or **ISF** (Storage).
-2. **Inventory:** If no filter exists, the item tries to enter the player's inventory.
-3. **Ground Security:** If no space remains, the item is dropped on the ground.
-*The system waits for extra drops from other plugins (like **mcMMO**) to ensure mining/excavation bonuses are not lost.*
+### 📦 Filters and Menus
+* `/abf` - Opens the **AutoBlock** menu (Items destroyed upon collection).
+* `/isf` - Opens the **InfinityStack** menu (Infinite virtual storage).
+* `/asf` - Opens the **AutoSell** menu (Automatic sale via Vault).
 
-## 📊 Detailed Collection Report (vfcb)
-**Total transparency.** Receive a color-coded log informing the exact destination of each item collected: how many units were sold, how many went to virtual storage, and what remained on the ground. 
+### 🛠️ Item Management (Java & Bedrock)
+* `/add<type> [slot]` - Adds the item in hand to the filter (Ex: `/addisf`). In ISF, it captures the entire inventory.
+* `/rem<type> [slot]` - Removes a filter by slot ID or by item in hand.
+* `/isg <slot> <all/pack/amount>` - **(Bedrock Focus)** Withdraws ISF items via chat.
 
-## 🏗️ Infinite Building with AutoFillHand
-**Build without interruptions.** Integrated with the database, the system detects when the block in your hand runs out and automatically replenishes a new stack of 64 units directly from your **ISF** storage, as long as you have stock.
+### 🤖 Automation and Logs
+* `/al` - Toggles **AutoLoot** (Automatic drop collection).
+* `/afh` - Toggles **AutoFillHand** (Automatic block replenishment in hand).
+* `/lo` - Toggles the display of **your own** loot logs.
+* `/la` - Toggles the display of **other players'** loot logs (32m radius).
+* `/vfat` - Toggles sale notifications in the **Action Bar**.
 
-## 📱 Full Bedrock Compatibility (GeyserMC)
-**Mobile and Console friendly.** Short and intuitive commands allow you to manage filters, add items, and withdraw from storage by **Slot ID**, without relying on menu clicks that may fail on touch devices.
+## 🔑 Permissions
+- `virtualfilter.admin`: Access to the `/vfreload` command.
+- `virtualfilter.<type>.<slot>`: Defines how many slots the player can have (Ex: `virtualfilter.isf.54`).
 
----
-
-## ⚡ Collection Priority Hierarchy
-To ensure the best economy, the system follows this strict order:
-**1st ASF (Sell)** > **2nd ISF (Storage)** > **3rd ABF (Ignore/Ground)**
-
----
-
-## 💻 Commands and Permissions Table
-
-
-
-| Command | Description | Permission |
-| :--- | :--- | :--- |
-| `/vf` / `/vfilter` | Main help menu | `virtualfilter.use` |
-| `/abf` / `/isf` / `/asf` | Opens the visual filter menu | `virtualfilter.use` |
-| `/isg <slot> <amt\|all>` | Withdraws ISF items by Slot ID | `virtualfilter.use` |
-| `/add[type] [slot]` | Adds item in hand to filter | `virtualfilter.use` |
-| `/rem[type] [slot]` | Removes filter (only if stock = 0) | `virtualfilter.use` |
-| `/al` | Toggles AutoLoot (Auto collection) | `virtualfilter.use` |
-| `/afh` | Toggles AutoFill (Hand refill) | `virtualfilter.use` |
-| `/vfcb` | Toggles Chest Collection Reports | `virtualfilter.chestdebug` |
-| `/vflang <en\|pt>` | Changes personal language | `virtualfilter.use` |
-| `/vfreload` | Reloads configurations (Admin) | `virtualfilter.admin` |
+## 🛠️ Installation
+1. Requires **Java 21**.
+2. Mandatory dependency: **Vault**.
+3. Optional dependency: **ShopGUI+** (For automatic price extraction).
+4. Place the JAR in the `plugins` folder and restart the server.
 
 ---
-
-## 📜 Full Command List
-
-*   **Menus:** `/abf`, `/isf`, `/asf` (Visual access to filters).
-*   **Item Management:**
-    *   `/addabf`, `/addisf`, `/addasf`: Adds the item in hand to the next free slot or a specific ID.
-    *   `/remabf`, `/remisf`, `/remasf`: Removes the filter. **Note:** ISF filters can only be removed if the stock is zero.
-    *   `/isg <id> <amount>`: Fast withdraw from virtual storage by Slot ID (1 to 54).
-*   **Player Settings:**
-    *   `/al`: Toggles automatic drop collection (Supports mcMMO).
-    *   `/afh`: Toggles automatic block replenishment in hand.
-    *   `/vfcb`: Toggles log messages when breaking containers.
-    *   `/vflang`: Switches between English and Portuguese.
-*   **Administration:**
-    *   `/vfreload`: Updates `config.yml`, `messages.yml`, and prices without restarting.
-
----
-
-## 🔑 System Permissions List
-
-*   `virtualfilter.admin`: Full access, reload commands, and unlocks all 54 slots.
-*   `virtualfilter.chestdebug`: Allows viewing chest collection reports.
-*   `virtualfilter.asf.<number>`: Defines available slots in the AutoSell filter.
-*   `virtualfilter.isf.<number>`: Defines available slots in the InfinityStack filter.
-*   `virtualfilter.abf.<number>`: Defines available slots in the AutoBlock filter.
-*   `virtualfilter.slot.<number>`: Specific permission to unlock individual slots by ID.
-
----
-
-## 🛠️ Installation and Configuration
-
-1.  **Installation:** Simply drag the `.jar` file into your `/plugins/` folder and start the server. The plugin will automatically create the data folder and the SQLite database.
-2.  **Security:** While the system has built-in protection against item loss, we recommend always performing a **backup** of your `/plugins/VirtualFilter/` folder before major updates.
-3.  **Customization:** You can edit messages in `messages.yml` and slot rates in `config.yml`. After changing, use `/vfreload` to apply changes instantly.
-4.  **Integration:** Ensure you have **Vault** installed so the AutoSell (ASF) system can pay players.
-
----
-*Developed by **comonier**.*
-*Tested and approved at **hu3.org***
-</div>
+*Developed with a focus on performance and data integrity via SQLite.*
