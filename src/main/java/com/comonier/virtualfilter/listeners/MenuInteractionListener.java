@@ -30,12 +30,8 @@ public class MenuInteractionListener implements Listener {
         String matName = VirtualFilter.getInstance().getFilterRepo().getMaterialAtSlot(uuid, typeCode, slot);
         if (matName == null) return;
         if (typeCode.equals("isf") && event.getClick() == ClickType.SHIFT_LEFT) {
-            long before = VirtualFilter.getInstance().getFilterRepo().getISFAmount(uuid, matName);
             VirtualFilter.getInstance().getFilterRepo().withdrawMassive(player, matName);
-            long after = VirtualFilter.getInstance().getFilterRepo().getISFAmount(uuid, matName);
-            long withdrawn = before - after;
-            if (withdrawn > 0) player.sendMessage("§6[VF] §aWithdrawn §f" + withdrawn + "x §e" + matName);
-            if (after <= 0) {
+            if (VirtualFilter.getInstance().getFilterRepo().getISFAmount(uuid, matName) <= 0) {
                 VirtualFilter.getInstance().getFilterRepo().removeAndShift(uuid, typeCode, slot);
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
             }
@@ -48,16 +44,12 @@ public class MenuInteractionListener implements Listener {
                 Material m = Material.getMaterial(matName);
                 if (m != null) {
                     HashMap<Integer, ItemStack> left = player.getInventory().addItem(new ItemStack(m, taken));
-                    int kept = taken;
                     if (!left.isEmpty()) {
-                        kept = taken - left.get(0).getAmount();
-                        left.values().forEach(i -> VirtualFilter.getInstance().getFilterRepo().addAmount(uuid, matName, (long) i.getAmount()));
+                        int remaining = 0;
+                        for (ItemStack s : left.values()) remaining += s.getAmount();
+                        VirtualFilter.getInstance().getFilterRepo().addAmount(uuid, matName, (long) remaining);
                         player.sendMessage("§6[VF] §c§lFULL INVENTORY!");
                         player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                    }
-                    if (kept > 0) {
-                        player.sendMessage("§6[VF] §aWithdrawn §f" + kept + "x §e" + matName);
-                        player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.5f, 1.2f);
                     }
                 }
             }
