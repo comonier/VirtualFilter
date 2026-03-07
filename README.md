@@ -1,5 +1,5 @@
 # 🟦 VirtualFilter
-###### Last Update: 1.7.3
+###### Last Update: 1.7.4
 The ultimate item management system with virtual storage, auto-sell, and container protection.
 
 ##### 🟩 Main Features
@@ -36,6 +36,44 @@ The ultimate item management system with virtual storage, auto-sell, and contain
 *   `virtualfilter.asf.<amount>`: Defines the amount of slots available in **AutoSell**.
 *   `virtualfilter.abf.<amount>`: Defines the amount of slots available in **AutoBlock**.
 
+<<<<<<< HEAD
 ##### 🟥 Important Notice
 *   For the **AutoSell** feature to work, a valid **Economy plugin** and **Vault** must be installed.
 *   To prevent **"Message not found"** errors after updating to v1.7.2, please delete your old `messages.yml`.
+=======
+**Commands**
+│➜ **/vf help** Opens the main help menu with all available
+    features.
+│➜ **/isf | /asf | /abf** Opens the respective filter
+    management GUI.
+│➜ **/addisf | /addasf | /addabf [slot]** Adds held item to a
+    filter.
+│➜ **/remisf | /remasf | /remabf [slot]** Removes a filter (ID
+    or Hand).
+│➜ **/isg [slot] [all|pack|qty]** Withdraws ISF items via chat
+    (Bedrock).
+│➜ **/al** Toggles AutoLoot (Automatic item collection) on/off.
+│➜ **/afh** Toggles AutoFillHand (Block replenishment) on/off.
+│➜ **/lo** Toggles Personal Loot logs in chat.
+│➜ **/la** Toggles Nearby Player Loot logs (32m radius).
+│➜ **/vfat** Toggles AutoSell notifications on the Action Bar.
+│➜ **/vfreload** Reloads all configurations, messages, and
+    prices.
+
+**Permissions**
+│➜ **virtualfilter.admin** Full access to reload and admin
+    commands.
+│➜ **virtualfilter.isf.[1-54]** Defines max allowed slots for ISF.
+│➜ **virtualfilter.asf.[1-54]** Defines max allowed slots for ASF.
+│➜ **virtualfilter.abf.[1-54]** Defines max allowed slots for ABF.
+
+**Important Notice**
+│➜ **Vault Required:** This plugin requires Vault to process 
+│➜ payments for the AutoSell feature.
+│➜ **Java 21:** Ensure your server is running on Java 21 or 
+│➜ higher for compatibility with the 1.21.1 core.
+│➜ **Reporting:** If you encounter any bugs, please use our 
+│➜ GitHub Issues section.
+
+**Developed by: Comonier**
+>>>>>>> 9ce4ccf (feat: implement shulker box protection and data integrity)

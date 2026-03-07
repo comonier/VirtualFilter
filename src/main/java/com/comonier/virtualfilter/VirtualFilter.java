@@ -69,19 +69,29 @@ public class VirtualFilter extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new AutoFillListener(), this);
         getServer().getPluginManager().registerEvents(new BlockLootListener(this.filterEngine, this.reportManager), this);
         getServer().getPluginManager().registerEvents(new EntityLootListener(this.filterEngine), this);
-        new Metrics(this, 29967);
+        new Metrics(this, 29969);
         getLogger().info("VirtualFilter v1.7.3 Enabled.");
     }
     private void loadMessages() {
         langFiles.clear();
-        String[] langs = {"en", "pt"};
-        int i = 0;
-        while (langs.length > i) {
-            String l = langs[i];
-            File f = new File(getDataFolder(), "messages_" + l + ".yml");
-            if (false == f.exists()) saveResource("messages_" + l + ".yml", false);
-            langFiles.put(l, YamlConfiguration.loadConfiguration(f));
-            i++;
+        File folder = getDataFolder();
+        File[] files = folder.listFiles();
+        if (null != files) {
+            int i = 0;
+            while (files.length > i) {
+                File f = files[i];
+                String name = f.getName();
+                if (name.startsWith("messages_") && name.endsWith(".yml")) {
+                    String langTag = name.replace("messages_", "").replace(".yml", "");
+                    langFiles.put(langTag, YamlConfiguration.loadConfiguration(f));
+                }
+                i++;
+            }
+        }
+        if (langFiles.isEmpty()) {
+            saveResource("messages_en.yml", false);
+            saveResource("messages_pt.yml", false);
+            loadMessages();
         }
     }
     public String getMsg(String playerLang, String path) {
