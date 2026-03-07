@@ -22,7 +22,6 @@ actionbar_on: "§aAction Bar notifications: ENABLED"
 actionbar_off: "§cAction Bar notifications: DISABLED"
 help_header: "§6§l--- VirtualFilter Help ---"
 help_line: "§e/%cmd% §7- %desc%"
-# Log Destinations
 log_dest_asf: "SOLD (ASF)"
 log_dest_isf: "STORED (ISF)"
 log_dest_abf: "BLOCKED (ABF)"

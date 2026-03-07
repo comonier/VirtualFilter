@@ -35,6 +35,13 @@ public class AddFilterCommand implements CommandExecutor {
         final Material matType = hand.getType();
         final String matName = matType.name();
 
+        // NOVA TRAVA: Shulker Boxes sao proibidas em qualquer filtro
+        if (matName.contains("SHULKER_BOX")) {
+            player.sendMessage("§c§lERROR: §fShulker Boxes não podem ser filtradas!");
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
+            return true;
+        }
+
         if (2 > matType.getMaxStackSize() || (hand.hasItemMeta() && hand.getItemMeta().hasDisplayName())) {
             player.sendMessage("§c§lERROR: §fItem inválido.");
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
@@ -53,7 +60,6 @@ public class AddFilterCommand implements CommandExecutor {
                 }
                 if (totalAdded > 0) {
                     VirtualFilter.getInstance().getFilterRepo().addAmount(uuid, matName, totalAdded);
-                    // TAG VF SEM NEGRITO (§6[VF])
                     player.sendMessage("§6[VF] §f" + totalAdded + "x §e" + matName + " §7merged!");
                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
                 }
@@ -88,7 +94,6 @@ public class AddFilterCommand implements CommandExecutor {
             final long finalAmount = initialAmount;
             saveToDB(uuid, type, targetSlot, matName, finalAmount);
             
-            // Sincronizacao de 2 Ticks para Lambda (final)
             VirtualFilter.getInstance().getServer().getScheduler().runTaskLater(VirtualFilter.getInstance(), () -> {
                 player.updateInventory(); 
                 FilterMenu.open(player, type);
@@ -99,7 +104,6 @@ public class AddFilterCommand implements CommandExecutor {
                         .replace("%slot%", String.valueOf(targetSlot + 1)));
                 
                 if (finalAmount > 0) {
-                    // TAG VF SEM NEGRITO (§6[VF])
                     player.sendMessage("§6[VF] §f" + finalAmount + "x §e" + matName + " §7stored!");
                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
                 }
