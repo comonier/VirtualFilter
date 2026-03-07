@@ -12,6 +12,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 public class VirtualFilter extends JavaPlugin {
     private static VirtualFilter instance;
     private static Economy econ = null;
@@ -20,15 +22,15 @@ public class VirtualFilter extends JavaPlugin {
     private FilterRepository filterRepo;
     private ReportManager reportManager;
     private FilterEngine filterEngine;
-    private FileConfiguration messages;
+    private final Map<String, FileConfiguration> langFiles = new HashMap<>();
     @Override
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
         loadMessages();
         ShopGUIHook.loadPrices();
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            getLogger().severe("Vault not found! AutoSell feature will not pay players.");
+        if (null == getServer().getPluginManager().getPlugin("Vault")) {
+            getLogger().severe("Vault not found!");
         } else {
             setupEconomy();
         }
@@ -38,10 +40,9 @@ public class VirtualFilter extends JavaPlugin {
         this.filterRepo = new FilterRepository(dbCore.getConnection());
         this.reportManager = new ReportManager();
         this.filterEngine = new FilterEngine(this.reportManager);
-        AdminCommands adminCmd = new AdminCommands();
-        getCommand("vfreload").setExecutor(adminCmd);
+        getCommand("vfreload").setExecutor(new AdminCommands());
         AutomationCommands autoCmd = new AutomationCommands();
-        getCommand("al").setExecutor(autoCmd); 
+        getCommand("al").setExecutor(autoCmd);
         getCommand("afh").setExecutor(autoCmd);
         getCommand("lo").setExecutor(autoCmd);
         getCommand("la").setExecutor(autoCmd);
@@ -58,53 +59,53 @@ public class VirtualFilter extends JavaPlugin {
         getCommand("remabf").setExecutor(remCmd);
         getCommand("remisf").setExecutor(remCmd);
         getCommand("remasf").setExecutor(remCmd);
-        StorageCommands storageCmd = new StorageCommands();
-        getCommand("isg").setExecutor(storageCmd);
-        HelpCommand helpCmd = new HelpCommand();
-        getCommand("vfhelp").setExecutor(helpCmd);
+        getCommand("isg").setExecutor(new StorageCommands());
+        getCommand("vfhelp").setExecutor(new HelpCommand());
         TabCompleteListener tc = new TabCompleteListener();
         String[] allCmds = {"abf","isf","asf","addabf","addisf","addasf","remabf","remisf","remasf","isg","al","afh","lo","la","vfhelp","vfreload"};
-        for (String s : allCmds) {
-            if (getCommand(s) != null) getCommand(s).setTabCompleter(tc);
-        }
+        for (String s : allCmds) { if (null != getCommand(s)) getCommand(s).setTabCompleter(tc); }
         getServer().getPluginManager().registerEvents(new PlayerInventoryListener(), this);
         getServer().getPluginManager().registerEvents(new MenuInteractionListener(), this);
         getServer().getPluginManager().registerEvents(new AutoFillListener(), this);
         getServer().getPluginManager().registerEvents(new BlockLootListener(this.filterEngine, this.reportManager), this);
         getServer().getPluginManager().registerEvents(new EntityLootListener(this.filterEngine), this);
-        getLogger().info("VirtualFilter v1.7.1 - Modular & Fixed.");
+        new Metrics(this, 29967);
+        getLogger().info("VirtualFilter v1.7.3 Enabled.");
     }
     private void loadMessages() {
-        File file = new File(getDataFolder(), "messages.yml");
-        if (!file.exists()) saveResource("messages.yml", false);
-        messages = YamlConfiguration.loadConfiguration(file);
+        langFiles.clear();
+        String[] langs = {"en", "pt"};
+        int i = 0;
+        while (langs.length > i) {
+            String l = langs[i];
+            File f = new File(getDataFolder(), "messages_" + l + ".yml");
+            if (false == f.exists()) saveResource("messages_" + l + ".yml", false);
+            langFiles.put(l, YamlConfiguration.loadConfiguration(f));
+            i++;
+        }
     }
     public String getMsg(String playerLang, String path) {
-        String lang = (playerLang == null) ? getConfig().getString("language", "en") : playerLang;
-        String msg = messages.getString(lang + "." + path);
-        if (msg == null) return "§cMessage not found: " + path;
-        return msg.replace("&", "§");
+        String lang = (null == playerLang) ? getConfig().getString("language", "en") : playerLang;
+        FileConfiguration config = langFiles.getOrDefault(lang, langFiles.get("en"));
+        String msg = config.getString(path);
+        if (null == msg && false == lang.equals("en")) msg = langFiles.get("en").getString(path);
+        return (null == msg) ? "§cMsg not found: " + path : msg.replace("&", "§");
     }
     private boolean setupEconomy() {
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) return false;
+        if (null == rsp) return false;
         econ = rsp.getProvider();
-        return econ != null;
+        return null != econ;
     }
     public void reloadPlugin() {
         reloadConfig();
         loadMessages();
         ShopGUIHook.loadPrices();
-        getLogger().info("Configurations reloaded.");
+        getLogger().info("Reloaded.");
     }
-    @Override
-    public void onDisable() {
-        if (dbCore != null) {
-            dbCore.closeConnection();
-            dbCore = null;
-        }
+    @Override public void onDisable() {
+        if (null != dbCore) dbCore.closeConnection();
         instance = null;
-        getLogger().info("VirtualFilter disabled and DB connection closed.");
     }
     public static VirtualFilter getInstance() { return instance; }
     public static Economy getEconomy() { return econ; }

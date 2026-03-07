@@ -1,42 +1,67 @@
-# 💎 VirtualFilter v1.7 (Modular Edition)
+# VirtualFilter
+**Last Update: 1.7.3**
 
-**VirtualFilter** is an advanced item filtering and virtual storage system, fully optimized for **Paper 1.21.1** servers with complete support for **Bedrock (GeyserMC)** players.
+The ultimate item filtering and virtual storage system for Paper 1.21.1, featuring infinite stacks, automatic sales, and full Bedrock (Geyser) compatibility.
 
-## 🚀 What's New in v1.7
-- **Bedrock Accessibility:** Redesigned withdrawal and addition commands for players without mouse shortcuts (Shift/Right-click).
-- **Auto-Shift (Mission 2):** Automatic slot reorganization. When a filter is removed, subsequent filters occupy the empty space, eliminating gaps.
-- **Smart Merge:** Add items to existing filters with one click (Shift+Left-click) to add to stock instantly.
-- **Independent Logs:** Full control over what you see in chat. Separate options for personal logs and nearby player logs.
-- **Total Alert:** Visual and sound notifications (Villager No) for full inventory across all platforms.
 
-## 🎮 Player Commands
+**Main Features**
+│➜ **Triple-Filter System (ISF, ASF, ABF):** Manage item 
+    collection with InfinityStack, AutoSell, and AutoBlock.
+│➜ **Bedrock & Geyser Focus:** Dedicated chat commands 
+    (/isg, /add, /rem) for players without mouse shortcuts.
+│➜ **Auto-Shift Logic:** Intelligent slot reorganization. 
+    Removing a filter shifts others to fill gaps automatically.
+│➜ **Smart Merge Technology:** One-click (Shift+Left) to 
+    instantly pull all items from inventory into ISF storage.
+│➜ **Native Economy Engine:** Vault integration for AutoSell 
+    based on prices defined in the prices.yml file.
+│➜ **Independent Log System:** Separate toggles for Personal 
+    Loot Logs (/lo) and Nearby Player Logs (/la) within 32m.
+│➜ **AutoFillHand (AFH):** Automatic block replenishment from 
+    physical inventory or ISF virtual stock while building.
+│➜ **AutoLoot (AL):** High-performance item collection for 
+    mining, fishing, and mob drops with protection metadata.
+│➜ **Anti-Spam Block Alerts:** Visual notifications for blocked 
+    items (ABF) limited to once per item type to keep chat clean.
+│➜ **Total Alert System:** Action Bar notifications for sales 
+    and "Villager No" sound alerts for full inventories.
+│➜ **SQLite Pro Core:** High-speed data integrity with WAL 
+    journal mode and automatic database vacuuming/reindex.
+│➜ **Dual Language System:** Instant switching between English 
+    (en) and Portuguese (pt) via messages_xx.yml files.
 
-### 📦 Filters and Menus
-* `/abf` - Opens the **AutoBlock** menu (Items destroyed upon collection).
-* `/isf` - Opens the **InfinityStack** menu (Infinite virtual storage).
-* `/asf` - Opens the **AutoSell** menu (Automatic sale via Vault).
+**Commands**
+│➜ **/vf help** Opens the main help menu with all available
+    features.
+│➜ **/isf | /asf | /abf** Opens the respective filter
+    management GUI.
+│➜ **/addisf | /addasf | /addabf [slot]** Adds held item to a
+    filter.
+│➜ **/remisf | /remasf | /remabf [slot]** Removes a filter (ID
+    or Hand).
+│➜ **/isg [slot] [all|pack|qty]** Withdraws ISF items via chat
+    (Bedrock).
+│➜ **/al** Toggles AutoLoot (Automatic item collection) on/off.
+│➜ **/afh** Toggles AutoFillHand (Block replenishment) on/off.
+│➜ **/lo** Toggles Personal Loot logs in chat.
+│➜ **/la** Toggles Nearby Player Loot logs (32m radius).
+│➜ **/vfat** Toggles AutoSell notifications on the Action Bar.
+│➜ **/vfreload** Reloads all configurations, messages, and
+    prices.
 
-### 🛠️ Item Management (Java & Bedrock)
-* `/add<type> [slot]` - Adds the item in hand to the filter (Ex: `/addisf`). In ISF, it captures the entire inventory.
-* `/rem<type> [slot]` - Removes a filter by slot ID or by item in hand.
-* `/isg <slot> <all/pack/amount>` - **(Bedrock Focus)** Withdraws ISF items via chat.
+**Permissions**
+│➜ **virtualfilter.admin** Full access to reload and admin
+    commands.
+│➜ **virtualfilter.isf.[1-54]** Defines max allowed slots for ISF.
+│➜ **virtualfilter.asf.[1-54]** Defines max allowed slots for ASF.
+│➜ **virtualfilter.abf.[1-54]** Defines max allowed slots for ABF.
 
-### 🤖 Automation and Logs
-* `/al` - Toggles **AutoLoot** (Automatic drop collection).
-* `/afh` - Toggles **AutoFillHand** (Automatic block replenishment in hand).
-* `/lo` - Toggles the display of **your own** loot logs.
-* `/la` - Toggles the display of **other players'** loot logs (32m radius).
-* `/vfat` - Toggles sale notifications in the **Action Bar**.
+**Important Notice**
+│➜ **Vault Required:** This plugin requires Vault to process 
+│➜ payments for the AutoSell feature.
+│➜ **Java 21:** Ensure your server is running on Java 21 or 
+│➜ higher for compatibility with the 1.21.1 core.
+│➜ **Reporting:** If you encounter any bugs, please use our 
+│➜ GitHub Issues section.
 
-## 🔑 Permissions
-- `virtualfilter.admin`: Access to the `/vfreload` command.
-- `virtualfilter.<type>.<slot>`: Defines how many slots the player can have (Ex: `virtualfilter.isf.54`).
-
-## 🛠️ Installation
-1. Requires **Java 21**.
-2. Mandatory dependency: **Vault**.
-3. Optional dependency: **ShopGUI+** (For automatic price extraction).
-4. Place the JAR in the `plugins` folder and restart the server.
-
----
-*Developed with a focus on performance and data integrity via SQLite.*
+**Developed by: Comonier**
