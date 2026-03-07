@@ -1,5 +1,5 @@
 name: VirtualFilter
-version: 1.7.4
+version: 1.7.6
 main: com.comonier.virtualfilter.VirtualFilter
 api-version: 1.21
 depend: [Vault]
