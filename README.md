@@ -5,12 +5,12 @@ The ultimate item filtering and virtual storage system for Paper 1.21.1, featuri
 
 
 **Main Features**
-│➜ **Triple-Filter System (ISF, ASF, ABF):** Manage item 
-    collection with InfinityStack, AutoSell, and AutoBlock.
-│➜ **Bedrock & Geyser Focus:** Dedicated chat commands 
-    (/isg, /add, /rem) for players without mouse shortcuts.
-│➜ **Auto-Shift Logic:** Intelligent slot reorganization. 
-    Removing a filter shifts others to fill gaps automatically.
+│➜ **Triple-Filter System (ISF, ASF, ABF):** Manage item<br>
+collection with InfinityStack, AutoSell, and AutoBlock.
+│➜ **Bedrock & Geyser Focus:** Dedicated chat commands
+(/isg, /add, /rem) for players without mouse shortcuts.
+│➜ **Auto-Shift Logic:** Intelligent slot reorganization.
+Removing a filter shifts others to fill gaps automatically.
 │➜ **Smart Merge Technology:** One-click (Shift+Left) to 
     instantly pull all items from inventory into ISF storage.
 │➜ **Native Economy Engine:** Vault integration for AutoSell 
