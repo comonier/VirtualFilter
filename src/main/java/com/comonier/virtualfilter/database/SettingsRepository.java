@@ -27,9 +27,10 @@ public class SettingsRepository {
     public boolean isAutoFillEnabled(UUID uuid) { return getBooleanSetting(uuid, "autofill_enabled", true); }
     public boolean isActionBarEnabled(UUID uuid) { return getBooleanSetting(uuid, "actionbar_enabled", true); }
     
-    // Novas opcoes de logs
     public boolean isLogsOwnEnabled(UUID uuid) { return getBooleanSetting(uuid, "logs_own", true); }
     public boolean isLogsAllEnabled(UUID uuid) { return getBooleanSetting(uuid, "logs_all", true); }
+    
+    public boolean isSafeDropEnabled(UUID uuid) { return getBooleanSetting(uuid, "safedrop_enabled", true); }
 
     private boolean getBooleanSetting(UUID uuid, String column, boolean defaultValue) {
         String query = "SELECT " + column + " FROM player_settings WHERE uuid = ?";
@@ -56,7 +57,8 @@ public class SettingsRepository {
     public void toggleAutoFill(UUID uuid) { updateSetting(uuid, "autofill_enabled", !isAutoFillEnabled(uuid)); }
     public void toggleActionBar(UUID uuid) { updateSetting(uuid, "actionbar_enabled", !isActionBarEnabled(uuid)); }
     
-    // Novos Toggles
     public void toggleLogsOwn(UUID uuid) { updateSetting(uuid, "logs_own", !isLogsOwnEnabled(uuid)); }
     public void toggleLogsAll(UUID uuid) { updateSetting(uuid, "logs_all", !isLogsAllEnabled(uuid)); }
+    
+    public void toggleSafeDrop(UUID uuid) { updateSetting(uuid, "safedrop_enabled", !isSafeDropEnabled(uuid)); }
 }

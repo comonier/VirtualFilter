@@ -35,27 +35,29 @@ public class AddFilterCommand implements CommandExecutor {
         final Material matType = hand.getType();
         final String matName = matType.name();
 
-        // NOVA TRAVA: Shulker Boxes sao proibidas em qualquer filtro
         if (matName.contains("SHULKER_BOX")) {
             player.sendMessage("§c§lERROR: §fShulker Boxes não podem ser filtradas!");
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
             return true;
         }
 
+        // TRAVA DE SEGURANÇA: Impede adicionar ou processar itens com Nomes Customizados (Slimefun/RPG)
         if (2 > matType.getMaxStackSize() || (hand.hasItemMeta() && hand.getItemMeta().hasDisplayName())) {
             player.sendMessage("§c§lERROR: §fItem inválido.");
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
             return true;
         }
 
-        // --- LOGICA DE MERGE ---
         if (VirtualFilter.getInstance().getFilterRepo().hasFilter(uuid, type, matName)) {
             if (type.equals("isf")) {
                 long totalAdded = 0;
                 for (ItemStack invItem : player.getInventory().getStorageContents()) {
+                    // PROTEÇÃO REFORÇADA: Ignora itens com Meta/Nome durante o merge
                     if (null != invItem && invItem.getType() == matType && invItem.getEnchantments().isEmpty()) {
-                        totalAdded += invItem.getAmount();
-                        invItem.setAmount(0);
+                        if (false == (invItem.hasItemMeta() && invItem.getItemMeta().hasDisplayName())) {
+                            totalAdded += invItem.getAmount();
+                            invItem.setAmount(0);
+                        }
                     }
                 }
                 if (totalAdded > 0) {
@@ -84,9 +86,12 @@ public class AddFilterCommand implements CommandExecutor {
             long initialAmount = 0;
             if (type.equals("isf")) {
                 for (ItemStack invItem : player.getInventory().getStorageContents()) {
+                    // PROTEÇÃO REFORÇADA: Ignora itens com Meta/Nome na criação do filtro
                     if (null != invItem && invItem.getType() == matType && invItem.getEnchantments().isEmpty()) {
-                        initialAmount += invItem.getAmount();
-                        invItem.setAmount(0);
+                        if (false == (invItem.hasItemMeta() && invItem.getItemMeta().hasDisplayName())) {
+                            initialAmount += invItem.getAmount();
+                            invItem.setAmount(0);
+                        }
                     }
                 }
             }

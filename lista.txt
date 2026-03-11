@@ -1,5 +1,5 @@
 Listagem de caminhos de pasta
-O n£mero de s‚rie do volume ‚ 44E2-1797
+O nÂ£mero de sâ€šrie do volume â€š 44E2-1797
 C:.
 |   .gitignore
 |   estrutura.txt
@@ -18,6 +18,7 @@ C:.
 |       |   \---com
 |       |       \---comonier
 |       |           \---virtualfilter
+|       |               |   Metrics.java
 |       |               |   VirtualFilter.java
 |       |               |   
 |       |               +---commands
@@ -28,6 +29,7 @@ C:.
 |       |               |       MenuCommands.java
 |       |               |       RemFilterCommand.java
 |       |               |       StorageCommands.java
+|       |               |       TabCompleteListener.java
 |       |               |       
 |       |               +---database
 |       |               |       DatabaseCore.java
@@ -54,22 +56,23 @@ C:.
 |       |                       
 |       \---resources
 |               config.yml
-|               messages.yml
+|               messages_en.yml
+|               messages_pt.yml
 |               plugin.yml
 |               prices.yml
 |               
 \---target
-    |   VirtualFilter-1.7.jar
-    |   
     +---classes
     |   |   config.yml
-    |   |   messages.yml
+    |   |   messages_en.yml
+    |   |   messages_pt.yml
     |   |   plugin.yml
     |   |   prices.yml
     |   |   
     |   \---com
     |       \---comonier
     |           \---virtualfilter
+    |               |   Metrics.class
     |               |   VirtualFilter.class
     |               |   
     |               +---commands
@@ -80,6 +83,7 @@ C:.
     |               |       MenuCommands.class
     |               |       RemFilterCommand.class
     |               |       StorageCommands.class
+    |               |       TabCompleteListener.class
     |               |       
     |               +---database
     |               |       DatabaseCore.class
@@ -97,6 +101,7 @@ C:.
     |               +---manager
     |               |   \---processor
     |               |           BlockLootListener.class
+    |               |           EntityLootListener$1.class
     |               |           EntityLootListener.class
     |               |           FilterEngine.class
     |               |           ReportManager.class
@@ -106,8 +111,6 @@ C:.
     |                       
     +---generated-sources
     |   \---annotations
-    +---generated-test-sources
-    |   \---test-annotations
     +---maven-archiver
     |       pom.properties
     |       

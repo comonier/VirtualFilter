@@ -1,5 +1,32 @@
+# Arquivos de Compilação e Build
 /target/
+*.jar
+*.war
+*.ear
+*.class
+
+# IDEs e Projetos
 /.settings/
 /.classpath/
 /.project/
 /.factorypath
+/.vscode/
+/.idea/
+*.iml
+*.ipr
+*.iws
+
+# Logs e Arquivos Temporários
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Arquivos de Texto Irrelevantes para o Código
+*.txt
+estrutura.txt
+lista.txt
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db

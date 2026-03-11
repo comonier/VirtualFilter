@@ -11,29 +11,22 @@ public class HelpCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Logica inversa: Se nao for jogador, aborta
         if (false == (sender instanceof Player)) return true;
 
         Player player = (Player) sender;
         UUID uuid = player.getUniqueId();
         String lang = VirtualFilter.getInstance().getSettingsRepo().getPlayerLanguage(uuid);
 
-        // Cabecalho da ajuda
-        player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "help_header"));
-        
-        // Linhas de comando traduzidas
-        sendHelp(player, lang, "abf/isf/asf", "Open filter menus");
-        sendHelp(player, lang, "add<type> [slot]", "Add item to filter");
-        sendHelp(player, lang, "rem<type> [slot]", "Remove item filter");
-        sendHelp(player, lang, "isg [slot] [all]", "Withdraw ISF items (Bedrock)");
-        sendHelp(player, lang, "al / afh", "Toggle AutoLoot / AutoFill");
-        sendHelp(player, lang, "lo / la", "Toggle Personal/Nearby Logs");
+        player.sendMessage("§6§l--- VirtualFilter Help ---");
+        player.sendMessage("§9/asf §7| §9/isf §7| §9/isfe §7| §9/abf §7- §eOpen GUIs");
+        player.sendMessage("§9/add§c<f> §7| §9/rem§c<f> §7[slot] §7- §eManage Filters");
+        player.sendMessage("§bFilters§7: §7<§casf§7|§cisf§7|§cisfe§7|§cabf§7> §7(Item in hand)");
+        player.sendMessage("§9/getisf §7| §9/getisfe §b<slot> <amount|all|pack> §7- §eWithdraw");
+        player.sendMessage("§9/al §7| §9/afh §7| §9/vfat §7| §9/sd §7- §eToggles");
+        player.sendMessage("§9/lo §7| §9/la §7- §eLoot Logs §7(Own/Nearby)");
+        player.sendMessage("§9/vflang §7| §9/vfreload §7- §eSettings");
+        player.sendMessage("§aJava§7: §bshift§7+§9left click §7in inventory to add filter.");
 
         return true;
-    }
-
-    private void sendHelp(Player p, String lang, String cmd, String desc) {
-        p.sendMessage(VirtualFilter.getInstance().getMsg(lang, "help_line")
-                .replace("%cmd%", cmd).replace("%desc%", desc));
     }
 }

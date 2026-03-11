@@ -1,41 +1,73 @@
-# 🟦 VirtualFilter
-###### Last Update: 1.7.5
+**VirtualFilter**
+Last Update: v1.7.7
 The ultimate item management system with virtual storage, auto-sell, and container protection.
 
-##### 🟩 Main Features
-*   **Filter Decision Engine:** Smart hierarchy: `AutoSell` ➜ `ISF` ➜ `AutoBlock` ➜ `Inventory`.
-*   **Shulker Box Integrity (New 1.7.5):** Complete protection for Shulker Boxes. They bypass filters and AutoLoot to preserve internal data, moving to **Inventory** ➜ **EnderChest** ➜ **Ground** (for both Mining and Pickup events).
-*   **AutoSell (ASF):** Sell items automatically based on customizable prices.
-*   **InfinityStack (ISF):** Infinite virtual storage for stackable items.
-*   **AutoBlock (ABF):** Automatically blocks items from entering the inventory.
-*   **AutoFillHand (AFH):** Automatically refills hand with blocks from **ISF** while building.
-*   **Independent Logs:** Full control via `/lo` (Personal) and `/la` (Nearby) logs.
-*   **AutoLoot & Magnet:** Advanced item pickup with sound cooldown.
-*   **Bedrock & Geyser Focus:** Full support for mobile players via specific chat commands for withdrawal and filter management.
-*   **Chest Guard System:** Processes items into `ISF` or `Inventory` before dropping leftovers from broken containers.
-*   **Smart Grouped Reports:** Summarizes collection results, including **ENDERCHEST** destinations.
+**Main Features**
+│➜ Filter Decision Engine: Smart hierarchy:
+│===========================================
+│➜ AutoSell ASF > InfinityStorageFilter ISF > InfinityStackEdit ISFE > AutoBlockFilter ABF > Inventory.
+│➜ It means a item only will get on player inventory after check all filters.
+│===========================================
+│➜ **AutoSell (ASF):** Sell items automatically based on customizable
+│➜ prices in prices.yml (Vanilla items only).
+│➜ **InfinityStack (ISF):** Infinite virtual storage for stackable 
+│➜ vanilla items, accessible by commands or GUI.
+│➜ **InfinityStackEdit (ISFE):** NEW! Infinite virtual storage 
+│➜ exclusive for EDITED items (Slimefun, RPG, Custom NBT).
+│➜ **AutoBlock (ABF):** Automatically blocks vanilla items from 
+│➜ entering the player's inventory.
+│➜ **AutoFillHand (AFH):** Integrated with ISF! Automatically refills your
+│➜ hand with blocks from virtual storage while building.
+│➜ **SafeDrop (SD):** NEW! Toggles 10s protection for dropped items.
+│➜ Shows countdown and instructions in chat when enabled.
+│➜ **Independent Logs (New):** Full control via /lo (Personal) and /la
+│➜ (Nearby players) logs. Shows player names and destinations.
+│➜ **AutoLoot & Magnet:** Advanced 10-block radius item pickup with a
+│➜ 2-second sound cooldown to prevent audio spam.
+│➜ **Bedrock & Geyser Focus:** Full support for mobile/console players
+│➜ via specific chat commands. ( /getisf <slotid> amount/pack/all )
+│➜ **Chest Guard System:** Prevents item loss when breaking
+│➜ containers. Processes items into ISF/ISFE or Inventory.
+│➜ **Smart Grouped Reports:** Summarizes results into a single message
+│➜ (ISF, ISFE, INV, or GROUND) showing the player's name.
+│➜ **Protection Integration:** Advanced NBT shield to protect custom
+│➜ items. Edited items bypass vanilla filters to prevent data loss.
+│===========================================
+│➜ **Shulker Box Integrity:** Complete protection for Shulker Boxes.
+│===========================================
+│➜ Shulker boxes now bypass all filters (ASF/ISF/ISFE/ABF) to 
+│➜ preserve internal NBT data and items when mined.
+│➜ **Smart Routing:** Mined shulkers follow a priority path:
+│➜ Inventory > EnderChest > Ground (Fallback).
+│===========================================
+│➜ **Improved Localization:** Fully updated messages_pt.yml and
+│➜ messages_en.yml with new syntax and ISFE keys.
 
-##### 🟦 Commands
-*   `vf help` / `vf`: Opens the main help menu.
-*   `isf` / `asf` / `abf`: Opens the filter GUIs.
-*   `isg <slot> [amount|pack|all]`: Withdraws items from virtual storage (Bedrock friendly).
-*   `addisf` / `addasf` / `addabf`: Adds held item to the respective filter.
-*   `remisf` / `remasf` / `remabf [slot]`: Removes a filter by item or Slot ID.
-*   `al` / `afh`: Toggles **AutoLoot** or **AutoFillHand**.
-*   `lo` / `la`: Toggles **Loot Reports** Own/All.
-*   `vfat`: Toggles Action Bar notifications.
-*   `vflang`: Switches language (en/pt).
-*   `vfreload`: `virtualfilter.admin` Reloads configurations.
 
-##### 🟨 Permissions
-*   `virtualfilter.admin`: Access to administrative commands.
-*   `virtualfilter.isf.[1-54]`: Max slots for ISF.
-*   `virtualfilter.asf.[1-54]`: Max slots for ASF.
-*   `virtualfilter.abf.[1-54]`: Max slots for ABF.
+**Commands**
+│➜ **/vf help** | **/vf** Opens the main help menu with all available features.
+│➜ **/isf** | **/asf** | **/abf** | **/isfe** Opens the GUI for each specific filter.
+│➜ **/getisf** | **/getisfe <slotid> <amount|all>** Withdraws items from ISF 
+│➜ or ISFE using the Slot ID. (Essential for Bedrock players).
+│➜ **/addisf** | **/addasf** | **/addabf** Adds the vanilla item in hand to filters.
+│➜ **/addisfe** Adds the edited/custom item in hand to ISFE storage.
+│➜ **/remisf** | **/remasf** | **/remabf** | **/remisfe [slotid]** Removes a filter.
+│➜ **/al** | **/afh** Toggles AutoLoot (pickup) or AutoFillHand (refill).
+│➜ **/lo** | **/la** Toggles Personal Loot Report Own/All (Nearby).
+│➜ **/sd** | **/safedrop** Toggles 10s drop protection for other players.
+│➜ **/vfat** Toggles sale and refill notifications in the Action Bar.
+│➜ **/vflang** Switches personal language between English (en) and 
+│➜ Portuguese (pt).
+│➜ **/vfreload** **virtualfilter.admin** Reloads all configs (Admin only).
 
-##### 🟥 Important Notice
-*   **Vault Required:** Requires an economy provider for AutoSell.
-*   **Java 21:** Minimum requirement.
-*   **Shulker Pickup Safe:** Shulkers will automatically move to your EnderChest if your inventory is full during pickup.
+**Permissions**
+│➜ **virtualfilter.admin** Permission for reload and admin commands.
+│➜ **virtualfilter.chestdebug** Permission to toggle chest break reports.
+│➜ **virtualfilter.isf.<number>** Slots available in ISF/ASF/ABF.
+│➜ **virtualfilter.isfe.<number>** Slots available in InfinityStackEdit.
 
-**Developed by: Comonier**
+**Important Notice**
+│➜ ISFE (Edited Storage) only accepts items with custom names.
+│➜ Vanilla filters (ASF/ISF/ABF) now ignore all custom/edited items
+│➜ to prevent NBT corruption (Slimefun compatibility).
+│➜ Vault and a valid Economy plugin are required for AutoSell.

@@ -22,43 +22,57 @@ public class TabCompleteListener implements TabCompleter {
 
         List<String> completions = new ArrayList<>();
 
-        // 1. Sugestoes de Slots para REMOCAO e SAQUE
-        if (cmd.startsWith("rem") || cmd.equals("isg")) {
+        // 1. Sugestões de Slots para REMOÇÃO e SAQUE (Vanilla e Editados)
+        if (cmd.startsWith("rem") || cmd.equals("getisf") || cmd.equals("getisfe")) {
             if (1 == args.length) {
-                String type = cmd.replace("rem", "").replace("isg", "isf");
-                for (int i = 0; 54 > i; i++) {
-                    if (null != VirtualFilter.getInstance().getFilterRepo().getMaterialAtSlot(uuid, type, i)) {
-                        completions.add(String.valueOf(i + 1));
+                String type = cmd.replace("rem", "");
+                
+                // Lógica para ISFE (Itens Editados)
+                if (type.equals("isfe") || cmd.equals("getisfe")) {
+                    for (int i = 0; 54 > i; i++) {
+                        if (null != VirtualFilter.getInstance().getFilterEditRepo().getItemDataAtSlot(uuid, "isfe", i)) {
+                            completions.add(String.valueOf(i + 1));
+                        }
+                    }
+                } else {
+                    // Lógica para Vanilla (ISF, ASF, ABF)
+                    String vType = type.equals("getisf") ? "isf" : type;
+                    for (int i = 0; 54 > i; i++) {
+                        if (null != VirtualFilter.getInstance().getFilterRepo().getMaterialAtSlot(uuid, vType, i)) {
+                            completions.add(String.valueOf(i + 1));
+                        }
                     }
                 }
             }
-            if (cmd.equals("isg") && 2 == args.length) {
+            if ((cmd.equals("getisf") || cmd.equals("getisfe")) && 2 == args.length) {
                 completions.addAll(Arrays.asList("all", "pack"));
             }
         }
 
-        // 2. Sugestoes de Slots Livres para ADICAO (Bedrock)
+        // 2. Sugestões de Slots Livres para ADIÇÃO (Bedrock)
         if (cmd.startsWith("add")) {
             if (1 == args.length) {
                 String type = cmd.replace("add", "");
-                int allowed = 54; // Simplificado para tab
-                for (int i = 0; allowed > i; i++) {
-                    if (null == VirtualFilter.getInstance().getFilterRepo().getMaterialAtSlot(uuid, type, i)) {
+                for (int i = 0; 54 > i; i++) {
+                    boolean isOccupied = (type.equals("isfe")) 
+                        ? null != VirtualFilter.getInstance().getFilterEditRepo().getItemDataAtSlot(uuid, "isfe", i)
+                        : null != VirtualFilter.getInstance().getFilterRepo().getMaterialAtSlot(uuid, type, i);
+                    
+                    if (false == isOccupied) {
                         completions.add(String.valueOf(i + 1));
-                        if (completions.size() > 5) break; // Nao poluir o chat
+                        if (completions.size() > 5) break;
                     }
                 }
             }
         }
 
-        // 3. Sugestoes para o comando principal /vf
+        // 3. Sugestões para o comando principal /vf
         if (cmd.equals("vfhelp") || cmd.equals("vf")) {
             if (1 == args.length) {
-                completions.addAll(Arrays.asList("help", "reload", "lang", "at"));
+                completions.addAll(Arrays.asList("help", "reload", "lang", "at", "sd"));
             }
         }
 
-        // Filtro final por caracteres digitados
         List<String> result = new ArrayList<>();
         String lastArg = args[args.length - 1].toLowerCase();
         for (String s : completions) {

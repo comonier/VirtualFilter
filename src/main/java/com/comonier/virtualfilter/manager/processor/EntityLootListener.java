@@ -29,13 +29,12 @@ public class EntityLootListener implements Listener {
         Player player = event.getPlayer();
         Item itemEntity = event.getItemDrop();
         ItemStack stack = itemEntity.getItemStack();
+        UUID uuid = player.getUniqueId();
         
-        // Marca o item com o dono e o tempo
         itemEntity.setMetadata("manual_drop", new FixedMetadataValue(VirtualFilter.getInstance(), true));
-        itemEntity.setMetadata("drop_owner", new FixedMetadataValue(VirtualFilter.getInstance(), player.getUniqueId().toString()));
+        itemEntity.setMetadata("drop_owner", new FixedMetadataValue(VirtualFilter.getInstance(), uuid.toString()));
         itemEntity.setMetadata("drop_time", new FixedMetadataValue(VirtualFilter.getInstance(), System.currentTimeMillis()));
 
-        // Inicia o Countdown de 10 segundos
         new BukkitRunnable() {
             int timer = 10;
             @Override
@@ -43,10 +42,16 @@ public class EntityLootListener implements Listener {
                 if (false == itemEntity.isValid() || itemEntity.isDead()) { this.cancel(); return; }
                 
                 if (timer > 0) {
-                    player.sendMessage("§7" + stack.getType().name() + " §e... " + timer);
+                    // Só envia a mensagem se o SafeDrop ainda estiver ativado para o jogador
+                    if (VirtualFilter.getInstance().getSettingsRepo().isSafeDropEnabled(uuid)) {
+                        String lang = VirtualFilter.getInstance().getSettingsRepo().getPlayerLanguage(uuid);
+                        String msg = VirtualFilter.getInstance().getMsg(lang, "safedrop_countdown")
+                                .replace("%item%", stack.getType().name())
+                                .replace("%time%", String.valueOf(timer));
+                        player.sendMessage(msg);
+                    }
                     timer--;
                 } else {
-                    // Tenta recolher após os 10s
                     handleAutoReturn(player, itemEntity);
                     this.cancel();
                 }
@@ -58,7 +63,6 @@ public class EntityLootListener implements Listener {
         if (false == itemEntity.isValid()) return;
         ItemStack stack = itemEntity.getItemStack();
 
-        // Se for Shulker: Inv -> EnderChest -> Ground
         if (stack.getType().name().contains("SHULKER_BOX")) {
             if (player.getInventory().addItem(stack).isEmpty()) {
                 itemEntity.remove();
@@ -76,7 +80,6 @@ public class EntityLootListener implements Listener {
             return;
         }
 
-        // Itens comuns: Passa pelo FilterEngine (ASF/ISF/ABF/Inv)
         if (engine.process(player, stack)) {
             itemEntity.remove();
             playTeleportSound(player);
@@ -90,24 +93,23 @@ public class EntityLootListener implements Listener {
         Item entity = event.getItem();
         UUID uuid = player.getUniqueId();
 
-        // Se o item tem dono (dropado) e ainda não passou 10 segundos, bloqueia pickup de estranhos
         if (entity.hasMetadata("drop_owner")) {
             UUID owner = UUID.fromString(entity.getMetadata("drop_owner").get(0).asString());
-            long dropTime = entity.getMetadata("drop_time").get(0).asLong();
-            long diff = System.currentTimeMillis() - dropTime;
+            
+            if (VirtualFilter.getInstance().getSettingsRepo().isSafeDropEnabled(owner)) {
+                long dropTime = entity.getMetadata("drop_time").get(0).asLong();
+                long diff = System.currentTimeMillis() - dropTime;
 
-            if (10000 > diff) {
-                // Se NÃO for o dono tentando pegar, cancela
-                if (false == uuid.equals(owner)) {
-                    event.setCancelled(true);
+                if (10000 > diff) {
+                    if (false == uuid.equals(owner)) {
+                        event.setCancelled(true);
+                        return;
+                    }
                     return;
                 }
-                // Se FOR o dono, deixa o Minecraft Vanilla agir (pegar normal)
-                return;
             }
         }
 
-        // Se o item é natural (mobs/morte), processa direto
         if (false == entity.hasMetadata("manual_drop")) {
             if (engine.process(player, entity.getItemStack())) {
                 entity.remove();

@@ -16,9 +16,11 @@ public class StorageCommands implements CommandExecutor {
 
         Player player = (Player) sender;
         UUID uuid = player.getUniqueId();
+        String lang = VirtualFilter.getInstance().getSettingsRepo().getPlayerLanguage(uuid);
 
         if (1 > args.length) {
-            player.sendMessage("§c§lSYNTAX ERROR: §f/isg [Slot ID] [all/pack/amount]");
+            player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "syntax_error")
+                    .replace("%cmd%", label).replace("%args%", "[slot] [all/pack/amount]"));
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
             return true;
         }
@@ -28,14 +30,14 @@ public class StorageCommands implements CommandExecutor {
             String matName = VirtualFilter.getInstance().getFilterRepo().getMaterialAtSlot(uuid, "isf", slotId);
 
             if (null == matName) { 
-                player.sendMessage("§c§lERROR: §fSlot vazio."); 
+                player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "filter_not_found")); 
                 return true; 
             }
 
             long available = VirtualFilter.getInstance().getFilterRepo().getISFAmount(uuid, matName);
             if (0 >= available) {
                 VirtualFilter.getInstance().getFilterRepo().removeAndShift(uuid, "isf", slotId);
-                player.sendMessage("§c§lERROR: §fEstoque vazio. Filtro removido.");
+                player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "filter_not_found"));
                 return true;
             }
 
@@ -43,7 +45,7 @@ public class StorageCommands implements CommandExecutor {
             if (1 < args.length) {
                 String sub = args[1].toLowerCase();
                 if (sub.equals("all")) {
-                    req = (int) Math.min(available, 2304L); // Limite de 1 inventário
+                    req = (int) Math.min(available, 2304L);
                 } else if (sub.equals("pack")) {
                     req = 64;
                 } else {
@@ -51,7 +53,6 @@ public class StorageCommands implements CommandExecutor {
                 }
             }
 
-            // Realiza o saque do banco de dados
             int taken = VirtualFilter.getInstance().getFilterRepo().withdrawFromISF(uuid, matName, req);
             
             if (taken > 0) {
@@ -60,7 +61,6 @@ public class StorageCommands implements CommandExecutor {
                     HashMap<Integer, ItemStack> left = player.getInventory().addItem(new ItemStack(mat, taken));
                     int kept = taken;
 
-                    // Se o inventário lotou, devolve o excedente para o ISF
                     if (false == left.isEmpty()) {
                         int rem = 0; 
                         for (ItemStack s : left.values()) {
@@ -74,13 +74,15 @@ public class StorageCommands implements CommandExecutor {
                     }
 
                     if (kept > 0) {
-                        player.sendMessage("§6[VF] §aWithdrawn §f" + kept + "x §e" + matName);
+                        String withdrawMsg = VirtualFilter.getInstance().getMsg(lang, "withdraw")
+                                .replace("%amount%", String.valueOf(kept))
+                                .replace("%item%", matName);
+                        player.sendMessage(withdrawMsg);
                         player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.5f, 1.2f);
                     }
                 }
             }
 
-            // Auto-remover filtro se zerar
             if (0 >= VirtualFilter.getInstance().getFilterRepo().getISFAmount(uuid, matName)) {
                 VirtualFilter.getInstance().getFilterRepo().removeAndShift(uuid, "isf", slotId);
             }

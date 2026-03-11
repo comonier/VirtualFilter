@@ -1,5 +1,5 @@
 name: VirtualFilter
-version: 1.7.6
+version: 1.7.7
 main: com.comonier.virtualfilter.VirtualFilter
 api-version: 1.21
 depend: [Vault]
@@ -12,12 +12,16 @@ commands:
     description: Abre o menu do InfinityStack.
   asf:
     description: Abre o menu do AutoSell.
+  isfe:
+    description: Abre o menu do InfinityStack Edit (Itens Editados).
   addabf:
     description: Adiciona o item da mao ao AutoBlock.
   addisf:
     description: Adiciona o item da mao ao InfinityStack.
   addasf:
     description: Adiciona o item da mao ao AutoSell.
+  addisfe:
+    description: Adiciona o item editado da mao ao InfinityStack Edit.
   remabf:
     description: Remove o item da mao ou por slot do AutoBlock.
     aliases: [rabf]
@@ -27,9 +31,15 @@ commands:
   remasf:
     description: Remove o item da mao ou por slot do AutoSell.
     aliases: [rasf]
-  isg:
+  remisfe:
+    description: Remove o item editado da mao ou por slot do ISFE.
+    aliases: [risfe]
+  getisf:
     description: Saca itens do seu estoque ISF por ID do slot.
-    aliases: [sacar, getisf]
+    aliases: [sacar, getisf, isg]
+  getisfe:
+    description: Saca itens do seu estoque ISFE por ID do slot.
+    aliases: [sacaredit]
   al:
     description: Ativa/Desativa o AutoLoot.
   afh:
@@ -42,6 +52,9 @@ commands:
     aliases: [vflogsall]
   vfat:
     description: Alterna avisos na Action Bar.
+  sd:
+    description: Alterna a protecao de 10 segundos para itens jogados no chao.
+    aliases: [safedrop]
   vflang:
     description: Altera o idioma pessoal (en/pt).
   vfhelp:

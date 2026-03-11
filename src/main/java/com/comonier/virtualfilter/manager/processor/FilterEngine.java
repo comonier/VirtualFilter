@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -23,65 +24,75 @@ public class FilterEngine {
             return false;
         }
 
-        // TRAVA SUPREMA: Shulker Boxes são ignoradas por todos os filtros (ASF/ISF/ABF)
-        // Isso garante que o BlockLootListener assuma o controle total sobre elas.
         if (item.getType().name().contains("SHULKER_BOX")) {
-            return false;
-        }
-
-        // Ignora itens com nomes customizados (ferramentas, itens de RPG, etc)
-        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
             return false;
         }
 
         UUID uuid = player.getUniqueId();
         String mat = item.getType().name();
         String lang = VirtualFilter.getInstance().getSettingsRepo().getPlayerLanguage(uuid);
+        ItemMeta meta = item.getItemMeta();
 
-        // 1. ASF - AutoSell (Verifica se está no filtro e se tem preço)
-        if (VirtualFilter.getInstance().getFilterRepo().hasFilter(uuid, "asf", mat)) {
-            double price = ShopGUIHook.getItemPrice(player, item);
-            if (price > 0.0) {
-                double total = price * item.getAmount();
-                VirtualFilter.getEconomy().depositPlayer(player, total);
-                
-                if (VirtualFilter.getInstance().getSettingsRepo().isActionBarEnabled(uuid)) {
-                    String abMsg = VirtualFilter.getInstance().getMsg(lang, "asf_actionbar")
-                            .replace("%price%", String.format("%.2f", total))
-                            .replace("%amount%", String.valueOf(item.getAmount()))
-                            .replace("%item%", mat);
-                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(abMsg));
-                }
-                
-                reportManager.logReport(player, mat, item.getAmount(), "log_dest_asf");
+        // --- NOVA CAMADA: ISFE (Itens Editados) ---
+        // Se o item tem nome customizado, ele ignora ASF/ISF/ABF e tenta o ISFE
+        if (null != meta && meta.hasDisplayName()) {
+            String customName = meta.getDisplayName();
+            if (VirtualFilter.getInstance().getFilterEditRepo().hasFilter(uuid, "isfe", mat, customName)) {
+                VirtualFilter.getInstance().getFilterEditRepo().addAmount(uuid, mat, customName, (long) item.getAmount());
+                reportManager.logReport(player, customName, item.getAmount(), "log_dest_isf");
                 return true;
+            }
+            // Se for editado mas NÃO tiver filtro ISFE, segue para o inventário normal (Fallback)
+        } else {
+            // --- FLUXO VANILLA (Itens sem nome customizado) ---
+            
+            // 1. ASF - AutoSell
+            if (VirtualFilter.getInstance().getFilterRepo().hasFilter(uuid, "asf", mat)) {
+                double price = ShopGUIHook.getItemPrice(player, item);
+                if (price > 0.0) {
+                    double total = price * item.getAmount();
+                    VirtualFilter.getEconomy().depositPlayer(player, total);
+                    
+                    if (VirtualFilter.getInstance().getSettingsRepo().isActionBarEnabled(uuid)) {
+                        String abMsg = VirtualFilter.getInstance().getMsg(lang, "asf_actionbar")
+                                .replace("%price%", String.format("%.2f", total))
+                                .replace("%amount%", String.valueOf(item.getAmount()))
+                                .replace("%item%", mat);
+                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(abMsg));
+                    }
+                    
+                    reportManager.logReport(player, mat, item.getAmount(), "log_dest_asf");
+                    return true;
+                }
+            }
+
+            // 2. ISF - InfinityStack
+            if (VirtualFilter.getInstance().getFilterRepo().hasFilter(uuid, "isf", mat)) {
+                VirtualFilter.getInstance().getFilterRepo().addAmount(uuid, mat, (long) item.getAmount());
+                reportManager.logReport(player, mat, item.getAmount(), "log_dest_isf");
+                return true;
+            }
+
+            // 3. ABF - AutoBlock
+            if (VirtualFilter.getInstance().getFilterRepo().hasFilter(uuid, "abf", mat)) {
+                reportManager.logReport(player, mat, item.getAmount(), "log_dest_abf");
+                return false;
             }
         }
 
-        // 2. ISF - InfinityStack (Armazenamento Virtual)
-        if (VirtualFilter.getInstance().getFilterRepo().hasFilter(uuid, "isf", mat)) {
-            VirtualFilter.getInstance().getFilterRepo().addAmount(uuid, mat, (long) item.getAmount());
-            reportManager.logReport(player, mat, item.getAmount(), "log_dest_isf");
-            return true;
-        }
-
-        // 3. ABF - AutoBlock (Deleta o drop se estiver no filtro)
-        if (VirtualFilter.getInstance().getFilterRepo().hasFilter(uuid, "abf", mat)) {
-            reportManager.logReport(player, mat, item.getAmount(), "log_dest_abf");
-            return false;
-        }
-
-        // Fallback: Tenta adicionar ao inventário normal
+        // Fallback: Inventário normal para Vanilla ou Editados sem filtro
         HashMap<Integer, ItemStack> left = player.getInventory().addItem(item.clone());
         if (left.isEmpty()) {
-            reportManager.logReport(player, mat, item.getAmount(), "log_dest_inv");
+            String reportName = (null != meta && meta.hasDisplayName()) ? meta.getDisplayName() : mat;
+            reportManager.logReport(player, reportName, item.getAmount(), "log_dest_inv");
             return true;
         }
 
-        // Se falhou (inventário cheio), o item cai no chão
         player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "inv_full"));
         player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-        reportManager.logReport(player, mat, item.getAmount(), "log_dest_full");
+        
+        String finalName = (null != meta && meta.hasDisplayName()) ? meta.getDisplayName() : mat;
+        reportManager.logReport(player, finalName, item.getAmount(), "log_dest_full");
         
         return false;
     }

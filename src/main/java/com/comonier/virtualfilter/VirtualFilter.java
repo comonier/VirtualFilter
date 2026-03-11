@@ -2,6 +2,7 @@ package com.comonier.virtualfilter;
 import com.comonier.virtualfilter.commands.*;
 import com.comonier.virtualfilter.database.DatabaseCore;
 import com.comonier.virtualfilter.database.FilterRepository;
+import com.comonier.virtualfilter.database.FilterEditRepository;
 import com.comonier.virtualfilter.database.SettingsRepository;
 import com.comonier.virtualfilter.listeners.*;
 import com.comonier.virtualfilter.manager.processor.*;
@@ -20,6 +21,7 @@ public class VirtualFilter extends JavaPlugin {
     private DatabaseCore dbCore;
     private SettingsRepository settingsRepo;
     private FilterRepository filterRepo;
+    private FilterEditRepository filterEditRepo;
     private ReportManager reportManager;
     private FilterEngine filterEngine;
     private final Map<String, FileConfiguration> langFiles = new HashMap<>();
@@ -38,6 +40,7 @@ public class VirtualFilter extends JavaPlugin {
         this.dbCore.setupDatabase();
         this.settingsRepo = new SettingsRepository(dbCore.getConnection());
         this.filterRepo = new FilterRepository(dbCore.getConnection());
+        this.filterEditRepo = new FilterEditRepository(dbCore.getConnection());
         this.reportManager = new ReportManager();
         this.filterEngine = new FilterEngine(this.reportManager);
         getCommand("vfreload").setExecutor(new AdminCommands());
@@ -47,30 +50,36 @@ public class VirtualFilter extends JavaPlugin {
         getCommand("lo").setExecutor(autoCmd);
         getCommand("la").setExecutor(autoCmd);
         getCommand("vfat").setExecutor(autoCmd);
+        getCommand("sd").setExecutor(autoCmd);
         MenuCommands menuCmd = new MenuCommands();
         getCommand("abf").setExecutor(menuCmd);
         getCommand("isf").setExecutor(menuCmd);
         getCommand("asf").setExecutor(menuCmd);
+        getCommand("isfe").setExecutor(menuCmd);
         AddFilterCommand addCmd = new AddFilterCommand();
         getCommand("addabf").setExecutor(addCmd);
         getCommand("addisf").setExecutor(addCmd);
         getCommand("addasf").setExecutor(addCmd);
+        getCommand("addisfe").setExecutor(new AddFilterEditCommand());
         RemFilterCommand remCmd = new RemFilterCommand();
         getCommand("remabf").setExecutor(remCmd);
         getCommand("remisf").setExecutor(remCmd);
         getCommand("remasf").setExecutor(remCmd);
-        getCommand("isg").setExecutor(new StorageCommands());
+        getCommand("remisfe").setExecutor(new RemFilterEditCommand());
+        getCommand("getisf").setExecutor(new StorageCommands());
+        getCommand("getisfe").setExecutor(new GetFilterEditCommand());
         getCommand("vfhelp").setExecutor(new HelpCommand());
         TabCompleteListener tc = new TabCompleteListener();
-        String[] allCmds = {"abf","isf","asf","addabf","addisf","addasf","remabf","remisf","remasf","isg","al","afh","lo","la","vfhelp","vfreload"};
+        String[] allCmds = {"abf","isf","asf","isfe","addabf","addisf","addasf","addisfe","remabf","remisf","remasf","remisfe","getisf","getisfe","al","afh","lo","la","sd","vfhelp","vfreload"};
         for (String s : allCmds) { if (null != getCommand(s)) getCommand(s).setTabCompleter(tc); }
         getServer().getPluginManager().registerEvents(new PlayerInventoryListener(), this);
         getServer().getPluginManager().registerEvents(new MenuInteractionListener(), this);
+        getServer().getPluginManager().registerEvents(new MenuInteractionEditListener(), this);
         getServer().getPluginManager().registerEvents(new AutoFillListener(), this);
         getServer().getPluginManager().registerEvents(new BlockLootListener(this.filterEngine, this.reportManager), this);
         getServer().getPluginManager().registerEvents(new EntityLootListener(this.filterEngine), this);
         new Metrics(this, 29969);
-        getLogger().info("VirtualFilter v1.7.3 Enabled.");
+        getLogger().info("VirtualFilter v1.7.7 Enabled.");
     }
     private void loadMessages() {
         langFiles.clear();
@@ -121,6 +130,7 @@ public class VirtualFilter extends JavaPlugin {
     public static Economy getEconomy() { return econ; }
     public SettingsRepository getSettingsRepo() { return settingsRepo; }
     public FilterRepository getFilterRepo() { return filterRepo; }
+    public FilterEditRepository getFilterEditRepo() { return filterEditRepo; }
     public FilterEngine getFilterEngine() { return filterEngine; }
     public ReportManager getReportManager() { return reportManager; }
     public DatabaseCore getDbCore() { return dbCore; }
