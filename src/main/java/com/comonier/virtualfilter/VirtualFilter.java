@@ -79,7 +79,7 @@ public class VirtualFilter extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockLootListener(this.filterEngine, this.reportManager), this);
         getServer().getPluginManager().registerEvents(new EntityLootListener(this.filterEngine), this);
         new Metrics(this, 29969);
-        getLogger().info("VirtualFilter v1.7.7 Enabled.");
+        getLogger().info("VirtualFilter v1.7.8 Enabled.");
     }
     private void loadMessages() {
         langFiles.clear();

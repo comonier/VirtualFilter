@@ -24,7 +24,7 @@ public class MenuInteractionEditListener implements Listener {
         Player player = (Player) event.getWhoClicked();
         String title = event.getView().getTitle();
         
-        if (false == title.contains("InfinityStackFilterEdited")) return;
+        if (false == title.equals("§8§lInfinityStackFilterEdited")) return;
         
         event.setCancelled(true);
         if (null == event.getClickedInventory() || event.getClickedInventory() == player.getInventory()) return;
