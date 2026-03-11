@@ -17,15 +17,24 @@ public class HelpCommand implements CommandExecutor {
         UUID uuid = player.getUniqueId();
         String lang = VirtualFilter.getInstance().getSettingsRepo().getPlayerLanguage(uuid);
 
-        player.sendMessage("§6§l--- VirtualFilter Help ---");
-        player.sendMessage("§9/asf §7| §9/isf §7| §9/isfe §7| §9/abf §7- §eOpen GUIs");
-        player.sendMessage("§9/add§c<f> §7| §9/rem§c<f> §7[slot] §7- §eManage Filters");
-        player.sendMessage("§bFilters§7: §7<§casf§7|§cisf§7|§cisfe§7|§cabf§7> §7(Item in hand)");
-        player.sendMessage("§9/getisf §7| §9/getisfe §b<slot> <amount|all|pack> §7- §eWithdraw");
-        player.sendMessage("§9/al §7| §9/afh §7| §9/vfat §7| §9/sd §7- §eToggles");
-        player.sendMessage("§9/lo §7| §9/la §7- §eLoot Logs §7(Own/Nearby)");
-        player.sendMessage("§9/vflang §7| §9/vfreload §7- §eSettings");
-        player.sendMessage("§aJava§7: §bshift§7+§9left click §7in inventory to add filter.");
+        player.sendMessage("§8-=-=-=-=-=-=-=-=-=-");
+        player.sendMessage("§0- §8[§a§lVF §3Commands§8]");
+        player.sendMessage("§0- §8[§9OpenGui§8]§f§l:§8[§7/§aisf§8][§7/§aisfe§8][§7/§easf§8][§7/§babf§8]");
+        player.sendMessage("§0- §8[§aJava§2Create§8]§f§l:§8[§cShift§8]§f§l+§r§8][§cLClick§8][§7on§6inv§8][§7on§6item§8]");
+        player.sendMessage("§0--§8>§7to §8[§3create§8][§3add§8][§3merge§8]");
+        player.sendMessage("§0- §8[§dBedrock§5Create§8]§f§l:§8[§7/§fadd§aisf§8][§7/§fadd§aisfe§8][§7/§fadd§easf§8][§7/§fadd§babf§8]");
+        player.sendMessage("§0- §8[§aJava§2WitD§8]§f§l:§8[§cShift§8]§f§l+§r§8][§cLClick§8][§7on§6filter§8][§7on§6icon§8]");
+        player.sendMessage("§0--§8>§7to §8[§3withdraw§8][§3all§8][§3possible§8]");
+        player.sendMessage("§0- §8[§dBedrock§5WitD§8]§f§l:§8[§7/§fget§aisf§8][§7/§fget§aisfe§8][§7slot§aid§8][§6amount§8][§6pack§8][§6all§8]");
+        player.sendMessage("§0- §8[§aJava§2Rem§8]§f§l:§8[§cShift§8]§f§l+§r§8][§cRClick§8][§7to§0:§cremove§8]");
+        player.sendMessage("§0- §8[§dBedrock§5Rem§8]§f§l:§8[§7/§frem§aisf§8][§7/§frem§aisfe§8][§7/§frem§easf§8][§7/§frem§babf§8][§7slot§aid§8]");
+        player.sendMessage("§0- §8[§7Filters Slots must be §bempty §7to be removed§8]");
+        player.sendMessage("§0- §8[§9AutoLoot§8]§f§l:§8[§7/§dal§8]§0:§8[§9AutoFillHand§8]§0:§8[§7/§dafh§8]");
+        player.sendMessage("§0- §8[§9LogOwn§8]§f§l:§8[§7/§dlo§8]§0:§8[§9LogAll§8]§0:§8[§7/§dla§8]");
+        player.sendMessage("§0- §8[§9Safedrop§8]§f§l:§8[§7/§dsd§8][§7Toggles §610§fs §7drop protection§8]");
+        player.sendMessage("§0- §8[§9Notification§8]§f§l:§8[§7/§dvfat§8][§7§7Toggles notifications in Action Bar§8]");
+        player.sendMessage("§0- §8[§9Language§8]§f§l:§8[§7/§dvflang§8][§7Switches§8][§dEn§8][§dPt§8]");
+        player.sendMessage("§8-=-=-=-=-=-=-=-=-=-");
 
         return true;
     }
