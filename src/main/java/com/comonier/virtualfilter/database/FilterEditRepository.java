@@ -43,6 +43,18 @@ public class FilterEditRepository {
         return null;
     }
 
+    public ItemStack getItemTemplate(UUID uuid, String material, String customName) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT item_data FROM player_filters_edit WHERE uuid = ? AND material = ? AND custom_name = ?")) {
+            ps.setString(1, uuid.toString()); ps.setString(2, material.toUpperCase()); ps.setString(3, customName);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                byte[] bytes = rs.getBytes("item_data");
+                if (null != bytes) return ItemStack.deserializeBytes(bytes);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
     public boolean hasFilter(UUID uuid, String type, String material, String customName) {
         try (PreparedStatement ps = connection.prepareStatement("SELECT 1 FROM player_filters_edit WHERE uuid = ? AND filter_type = ? AND material = ? AND custom_name = ?")) {
             ps.setString(1, uuid.toString()); ps.setString(2, type.toLowerCase()); 
@@ -77,14 +89,19 @@ public class FilterEditRepository {
         UUID u = player.getUniqueId(); long currentTotal = getISFEAmount(u, materialName, customName);
         if (currentTotal <= 0) return; int maxStack = mat.getMaxStackSize(); long initialTotal = currentTotal;
         
+        ItemStack template = getItemTemplate(u, materialName, customName);
+
         for (int i = 0; 36 > i; i++) {
             if (0 >= currentTotal) break; 
             ItemStack item = player.getInventory().getItem(i);
             if (item == null || item.getType() == Material.AIR) {
                 int taking = (int) Math.min(currentTotal, (long) maxStack);
-                ItemStack newItem = new ItemStack(mat, taking);
-                ItemMeta meta = newItem.getItemMeta();
-                if (meta != null) { meta.setDisplayName(customName); newItem.setItemMeta(meta); }
+                ItemStack newItem = (null != template) ? template.clone() : new ItemStack(mat);
+                if (null == template) {
+                    ItemMeta meta = newItem.getItemMeta();
+                    if (null != meta) { meta.setDisplayName(customName); newItem.setItemMeta(meta); }
+                }
+                newItem.setAmount(taking);
                 player.getInventory().setItem(i, newItem); currentTotal -= taking;
             }
         }

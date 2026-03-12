@@ -33,8 +33,6 @@ public class FilterEngine {
         String lang = VirtualFilter.getInstance().getSettingsRepo().getPlayerLanguage(uuid);
         ItemMeta meta = item.getItemMeta();
 
-        // --- NOVA CAMADA: ISFE (Itens Editados) ---
-        // Se o item tem nome customizado, ele ignora ASF/ISF/ABF e tenta o ISFE
         if (null != meta && meta.hasDisplayName()) {
             String customName = meta.getDisplayName();
             if (VirtualFilter.getInstance().getFilterEditRepo().hasFilter(uuid, "isfe", mat, customName)) {
@@ -42,11 +40,7 @@ public class FilterEngine {
                 reportManager.logReport(player, customName, item.getAmount(), "log_dest_isf");
                 return true;
             }
-            // Se for editado mas NÃO tiver filtro ISFE, segue para o inventário normal (Fallback)
         } else {
-            // --- FLUXO VANILLA (Itens sem nome customizado) ---
-            
-            // 1. ASF - AutoSell
             if (VirtualFilter.getInstance().getFilterRepo().hasFilter(uuid, "asf", mat)) {
                 double price = ShopGUIHook.getItemPrice(player, item);
                 if (price > 0.0) {
@@ -55,7 +49,7 @@ public class FilterEngine {
                     
                     if (VirtualFilter.getInstance().getSettingsRepo().isActionBarEnabled(uuid)) {
                         String abMsg = VirtualFilter.getInstance().getMsg(lang, "asf_actionbar")
-                                .replace("%price%", String.format("%.2f", total))
+                                .replace("%price%", String.valueOf(String.format("%.2f", total)))
                                 .replace("%amount%", String.valueOf(item.getAmount()))
                                 .replace("%item%", mat);
                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(abMsg));
@@ -66,21 +60,18 @@ public class FilterEngine {
                 }
             }
 
-            // 2. ISF - InfinityStack
             if (VirtualFilter.getInstance().getFilterRepo().hasFilter(uuid, "isf", mat)) {
                 VirtualFilter.getInstance().getFilterRepo().addAmount(uuid, mat, (long) item.getAmount());
                 reportManager.logReport(player, mat, item.getAmount(), "log_dest_isf");
                 return true;
             }
 
-            // 3. ABF - AutoBlock
             if (VirtualFilter.getInstance().getFilterRepo().hasFilter(uuid, "abf", mat)) {
                 reportManager.logReport(player, mat, item.getAmount(), "log_dest_abf");
                 return false;
             }
         }
 
-        // Fallback: Inventário normal para Vanilla ou Editados sem filtro
         HashMap<Integer, ItemStack> left = player.getInventory().addItem(item.clone());
         if (left.isEmpty()) {
             String reportName = (null != meta && meta.hasDisplayName()) ? meta.getDisplayName() : mat;

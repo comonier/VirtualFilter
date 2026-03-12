@@ -62,30 +62,36 @@ public class GetFilterEditCommand implements CommandExecutor {
             int taken = VirtualFilter.getInstance().getFilterEditRepo().withdrawFromISFE(uuid, matName, customName, req);
 
             if (taken > 0) {
-                Material mat = Material.getMaterial(matName);
-                if (null != mat) {
-                    ItemStack itemToGive = new ItemStack(mat, taken);
+                ItemStack template = VirtualFilter.getInstance().getFilterEditRepo().getItemTemplate(uuid, matName, customName);
+                ItemStack itemToGive;
+
+                if (null != template) {
+                    itemToGive = template.clone();
+                    itemToGive.setAmount(taken);
+                } else {
+                    Material mat = Material.getMaterial(matName);
+                    itemToGive = new ItemStack(null != mat ? mat : Material.BARRIER, taken);
                     ItemMeta meta = itemToGive.getItemMeta();
                     if (null != meta) {
                         meta.setDisplayName(customName);
                         itemToGive.setItemMeta(meta);
                     }
-
-                    HashMap<Integer, ItemStack> left = player.getInventory().addItem(itemToGive);
-                    if (false == left.isEmpty()) {
-                        int rem = 0;
-                        for (ItemStack s : left.values()) rem += s.getAmount();
-                        VirtualFilter.getInstance().getFilterEditRepo().addAmount(uuid, matName, customName, (long) rem);
-                        player.sendMessage("§6[VFE] §c§lFULL INVENTORY!");
-                        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                    }
-                    
-                    String withdrawMsg = VirtualFilter.getInstance().getMsg(lang, "withdraw")
-                            .replace("%amount%", String.valueOf(taken))
-                            .replace("%item%", customName);
-                    player.sendMessage("§6[VFE] " + withdrawMsg);
-                    player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.5f, 1.2f);
                 }
+
+                HashMap<Integer, ItemStack> left = player.getInventory().addItem(itemToGive);
+                if (false == left.isEmpty()) {
+                    int rem = 0;
+                    for (ItemStack s : left.values()) rem += s.getAmount();
+                    VirtualFilter.getInstance().getFilterEditRepo().addAmount(uuid, matName, customName, (long) rem);
+                    player.sendMessage("§6[VFE] §c§lFULL INVENTORY!");
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                }
+                
+                String withdrawMsg = VirtualFilter.getInstance().getMsg(lang, "withdraw")
+                        .replace("%amount%", String.valueOf(taken))
+                        .replace("%item%", customName);
+                player.sendMessage("§6[VFE] " + withdrawMsg);
+                player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.5f, 1.2f);
             }
 
             if (0 >= VirtualFilter.getInstance().getFilterEditRepo().getISFEAmount(uuid, matName, customName)) {

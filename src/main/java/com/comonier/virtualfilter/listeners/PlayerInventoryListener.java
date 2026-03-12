@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import java.util.UUID;
 
@@ -19,7 +20,7 @@ public class PlayerInventoryListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerInvClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
+        if (false == (event.getWhoClicked() instanceof Player)) return;
         Player player = (Player) event.getWhoClicked();
         if (event.getClickedInventory() != player.getInventory()) return;
         
@@ -97,6 +98,7 @@ public class PlayerInventoryListener implements Listener {
         }
 
         if (-1 != targetSlot) {
+            byte[] itemData = item.serializeAsBytes();
             long total = 0;
             for (ItemStack invItem : player.getInventory().getStorageContents()) {
                 if (null != invItem && invItem.getType() == matType && invItem.hasItemMeta()) {
@@ -106,7 +108,7 @@ public class PlayerInventoryListener implements Listener {
                     }
                 }
             }
-            saveToDBEdit(uuid, "isfe", targetSlot, matName, customName, total);
+            saveToDBEdit(uuid, "isfe", targetSlot, matName, customName, total, itemData);
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 1.5f);
         }
     }
@@ -185,12 +187,13 @@ public class PlayerInventoryListener implements Listener {
         } catch (java.sql.SQLException e) { e.printStackTrace(); }
     }
 
-    private void saveToDBEdit(UUID uuid, String type, int slot, String mat, String custom, long amount) {
-        String query = "INSERT OR REPLACE INTO player_filters_edit (uuid, filter_type, slot_id, material, custom_name, amount) VALUES (?, ?, ?, ?, ?, ?)";
-        try (java.sql.PreparedStatement ps = VirtualFilter.getInstance().getDbCore().getConnection().prepareStatement(query)) {
+    private void saveToDBEdit(UUID uuid, String type, int slot, String mat, String custom, long amount, byte[] data) {
+        String query = "INSERT OR REPLACE INTO player_filters_edit (uuid, filter_type, slot_id, material, custom_name, amount, item_data) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (java.sql.PreparedStatement ps = VirtualFilter.getInstance().getDbCore().getEditConnection().prepareStatement(query)) {
             ps.setString(1, uuid.toString()); ps.setString(2, type.toLowerCase());
             ps.setInt(3, slot); ps.setString(4, mat.toUpperCase());
-            ps.setString(5, custom); ps.setLong(6, amount); ps.executeUpdate();
+            ps.setString(5, custom); ps.setLong(6, amount);
+            ps.setBytes(7, data); ps.executeUpdate();
         } catch (java.sql.SQLException e) { e.printStackTrace(); }
     }
 }

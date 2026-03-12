@@ -57,23 +57,29 @@ public class MenuInteractionEditListener implements Listener {
         if (event.getClick() == ClickType.RIGHT) {
             int taken = VirtualFilter.getInstance().getFilterEditRepo().withdrawFromISFE(uuid, matName, customName, 64);
             if (taken > 0) {
-                Material m = Material.getMaterial(matName);
-                if (null != m) {
-                    ItemStack itemToGive = new ItemStack(m, taken);
+                ItemStack template = VirtualFilter.getInstance().getFilterEditRepo().getItemTemplate(uuid, matName, customName);
+                ItemStack itemToGive;
+                
+                if (null != template) {
+                    itemToGive = template.clone();
+                    itemToGive.setAmount(taken);
+                } else {
+                    Material m = Material.getMaterial(matName);
+                    itemToGive = new ItemStack(null != m ? m : Material.BARRIER, taken);
                     ItemMeta meta = itemToGive.getItemMeta();
                     if (null != meta) {
                         meta.setDisplayName(customName);
                         itemToGive.setItemMeta(meta);
                     }
+                }
 
-                    HashMap<Integer, ItemStack> left = player.getInventory().addItem(itemToGive);
-                    if (false == left.isEmpty()) {
-                        int remaining = 0;
-                        for (ItemStack s : left.values()) remaining += s.getAmount();
-                        VirtualFilter.getInstance().getFilterEditRepo().addAmount(uuid, matName, customName, (long) remaining);
-                        player.sendMessage("§6[VFE] §c§lFULL INVENTORY!");
-                        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                    }
+                HashMap<Integer, ItemStack> left = player.getInventory().addItem(itemToGive);
+                if (false == left.isEmpty()) {
+                    int remaining = 0;
+                    for (ItemStack s : left.values()) remaining += s.getAmount();
+                    VirtualFilter.getInstance().getFilterEditRepo().addAmount(uuid, matName, customName, (long) remaining);
+                    player.sendMessage("§6[VFE] §c§lFULL INVENTORY!");
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                 }
             }
             sync(player);

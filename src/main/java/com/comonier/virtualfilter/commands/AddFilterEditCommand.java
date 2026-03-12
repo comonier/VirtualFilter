@@ -81,6 +81,7 @@ public class AddFilterEditCommand implements CommandExecutor {
         }
 
         if (-1 != targetSlotId) {
+            byte[] itemBytes = hand.serializeAsBytes();
             long initialAmount = 0;
             for (ItemStack invItem : player.getInventory().getStorageContents()) {
                 if (null != invItem && invItem.getType() == matType && invItem.hasItemMeta()) {
@@ -91,7 +92,7 @@ public class AddFilterEditCommand implements CommandExecutor {
                 }
             }
 
-            saveToDB(uuid, type, targetSlotId, matName, customName, initialAmount);
+            saveToDB(uuid, type, targetSlotId, matName, customName, initialAmount, itemBytes);
             
             final int finalSlot = targetSlotId + 1;
             final long finalAmt = initialAmount;
@@ -128,15 +129,16 @@ public class AddFilterEditCommand implements CommandExecutor {
         return (max >= 54) ? 54 : max;
     }
 
-    private void saveToDB(UUID uuid, String type, int slot, String mat, String customName, long amount) {
-        String query = "INSERT OR REPLACE INTO player_filters_edit (uuid, filter_type, slot_id, material, custom_name, amount) VALUES (?, ?, ?, ?, ?, ?)";
-        try (java.sql.PreparedStatement ps = VirtualFilter.getInstance().getDbCore().getConnection().prepareStatement(query)) {
+    private void saveToDB(UUID uuid, String type, int slot, String mat, String customName, long amount, byte[] data) {
+        String query = "INSERT OR REPLACE INTO player_filters_edit (uuid, filter_type, slot_id, material, custom_name, amount, item_data) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (java.sql.PreparedStatement ps = VirtualFilter.getInstance().getDbCore().getEditConnection().prepareStatement(query)) {
             ps.setString(1, uuid.toString());
             ps.setString(2, type);
             ps.setInt(3, slot);
             ps.setString(4, mat.toUpperCase());
             ps.setString(5, customName);
             ps.setLong(6, amount);
+            ps.setBytes(7, data);
             ps.executeUpdate();
         } catch (java.sql.SQLException e) { e.printStackTrace(); }
     }

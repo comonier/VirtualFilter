@@ -79,19 +79,27 @@ public class AutoFillListener implements Listener {
 
             if (type.getMaxStackSize() > 1) {
                 int amountTaken = 0;
+                ItemStack template = null;
                 if (isEdit) {
                     amountTaken = VirtualFilter.getInstance().getFilterEditRepo().withdrawFromISFE(uuid, type.name(), customName, 64);
+                    template = VirtualFilter.getInstance().getFilterEditRepo().getItemTemplate(uuid, type.name(), customName);
                 } else {
                     amountTaken = VirtualFilter.getInstance().getFilterRepo().withdrawFromISF(uuid, type.name(), 64);
                 }
 
                 if (amountTaken > 0) {
-                    ItemStack newItem = new ItemStack(type, amountTaken);
-                    if (isEdit) {
-                        ItemMeta meta = newItem.getItemMeta();
-                        if (null != meta) {
-                            meta.setDisplayName(customName);
-                            newItem.setItemMeta(meta);
+                    ItemStack newItem;
+                    if (isEdit && null != template) {
+                        newItem = template.clone();
+                        newItem.setAmount(amountTaken);
+                    } else {
+                        newItem = new ItemStack(type, amountTaken);
+                        if (isEdit) {
+                            ItemMeta meta = newItem.getItemMeta();
+                            if (null != meta) {
+                                meta.setDisplayName(customName);
+                                newItem.setItemMeta(meta);
+                            }
                         }
                     }
                     
