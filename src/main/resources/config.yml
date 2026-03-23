@@ -1,45 +1,67 @@
 # ==========================================================
-#             VirtualFilter - Configuracao v1.6
+#                   VirtualFilter Config
 # ==========================================================
 
-# Idioma padrao do servidor (en/pt)
+# Default server language (en/pt)
 language: en
 
-# Tipo de armazenamento (SQLITE)
+# Storage type (Currently supporting SQLITE)
 storage-type: SQLITE
 
-# --- Configuracoes de Slots ---
-# Slots iniciais para jogadores sem permissoes especificas
+# --- Command & Permission Reference ---
+# /abf - Opens AutoBlock menu
+# /isf - Opens InfinityStack menu
+# /asf - Opens AutoSell menu
+# /isfe - Opens Edited Items menu (ISFE)
+# /addabf, /addisf, /addasf, /addisfe - Adds item in hand to filter
+# /remabf, /remisf, /remasf, /remisfe [slot] - Removes filter
+# /getisf, /getisfe [slot] [amount/pack/all] - Withdraws items
+# /al - Toggles AutoLoot
+# /afh - Toggles AutoFillHand
+# /sd - Toggles SafeDrop (10s protection)
+# /vfat - Toggles ActionBar notifications
+# /vflang - Changes personal language
+# /vfreload - Reloads plugin (Permission: virtualfilter.admin)
+#
+# Permissions:
+# virtualfilter.admin - Access to reload command
+# virtualfilter.abf.[amount] - Max slots for AutoBlock (e.g., .27)
+# virtualfilter.isf.[amount] - Max slots for InfinityStack
+# virtualfilter.asf.[amount] - Max slots for AutoSell
+# virtualfilter.isfe.[amount] - Max slots for Edited Items
+
+# --- Slot Settings ---
+# Initial slots for players without specific permissions
 default-slots:
   abf: 1
   isf: 1
   asf: 1
 
-# --- Configuracoes de Automacao ---
-# Define se o AutoLoot (AL) vem ativado para novos jogadores
+# --- Automation Settings ---
+# Defines if AutoLoot (AL) starts enabled for new players
 default-autoloot-enabled: false
 
-# Define se o AutoFillHand (Reposicao de itens na mao) vem ativado
+# Defines if AutoFillHand (Refill items in hand) starts enabled
 default-autofill-enabled: true
 
-# --- Protecao e Seguranca ---
-# Tempo em segundos que um item fica protegido para o dono (Mineracao/Mobs)
-# Apos esse tempo, qualquer jogador pode coletar.
+# --- Protection & Security ---
+# Time in seconds an item is protected for the owner (Mining/Mobs)
+# After this time, any player can collect it.
 loot-protection-seconds: 10
 
-# --- Relatorios e Notificacoes ---
-# Define se o aviso de relatorio de baus (vfcb) vem ativado por padrao
+# --- Reports & Notifications ---
+# Defines if chest debug messages start enabled
 default-chest-debug-enabled: true
 
-# Notificacoes de Venda (AutoSell) na Action Bar
+# AutoSell sale notifications on Action Bar
 default-actionbar-enabled: true
 
-# --- Integracoes Externas ---
-# Se o plugin deve aguardar drops de outros plugins (como mcMMO)
-# Recomendado manter em 'true' para garantir bonus de mineracao/escavacao.
+# --- External Integrations ---
+# Should the plugin wait for drops from other plugins (like mcMMO)?
+# Recommended 'true' to ensure mining/excavation bonuses are filtered.
 wait-for-extra-drops: true
 
-# Configuracoes do ShopGUI+
-shopgui-integration:
-  enabled: true
+# --- Internal Economy Settings ---
+# Default price for items not listed in prices.yml
+economy-settings:
   fallback-price: 0.1

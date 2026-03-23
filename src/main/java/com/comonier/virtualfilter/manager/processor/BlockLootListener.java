@@ -39,8 +39,8 @@ public class BlockLootListener implements Listener {
         for (Item itemEntity : event.getItems()) {
             ItemStack stack = itemEntity.getItemStack();
             
+            // Shulkers sempre tentam ir para o inv/ender/chao (nao entram no filtro)
             if (stack.getType().name().contains("SHULKER_BOX")) {
-                // 1. Tenta Inventário
                 HashMap<Integer, ItemStack> leftInv = player.getInventory().addItem(stack);
                 if (leftInv.isEmpty()) {
                     toRemove.add(itemEntity);
@@ -49,7 +49,6 @@ public class BlockLootListener implements Listener {
                     continue;
                 }
 
-                // 2. Tenta Ender Chest
                 HashMap<Integer, ItemStack> leftEnder = player.getEnderChest().addItem(stack);
                 if (leftEnder.isEmpty()) {
                     toRemove.add(itemEntity);
@@ -57,15 +56,16 @@ public class BlockLootListener implements Listener {
                     player.playSound(player.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN, 0.5f, 1.2f);
                     continue;
                 }
-
-                // 3. Fallback: Chão
+                
                 reportManager.logReport(player, stack.getType().name(), 1, "log_dest_full");
                 continue;
             }
 
+            // Metadados para protecao de drop (SafeDrop)
             itemEntity.setMetadata("item_owner", new FixedMetadataValue(VirtualFilter.getInstance(), uuid.toString()));
             itemEntity.setMetadata("drop_time", new FixedMetadataValue(VirtualFilter.getInstance(), System.currentTimeMillis()));
 
+            // Se o AutoLoot estiver ON, processa via Engine (onde as travas de Meta estao)
             if (al) {
                 if (engine.process(player, stack)) {
                     toRemove.add(itemEntity);
@@ -83,21 +83,32 @@ public class BlockLootListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
+        // Ignora se for Shulker (tratado no evento de drop acima)
         if (event.getBlock().getState() instanceof ShulkerBox) return;
 
+        // Se o bloco for um Bau/Container e o AutoLoot estiver ON
         if (event.getBlock().getState() instanceof Container) {
             Container container = (Container) event.getBlock().getState();
             if (VirtualFilter.getInstance().getSettingsRepo().isAutoLootEnabled(player.getUniqueId())) {
+                
                 for (ItemStack item : container.getInventory().getContents()) {
                     if (null != item && item.getType() != Material.AIR) {
+                        // O engine.process ja separa Ferro (ISF) de Zinco (ISFE) pelo nome
                         if (engine.process(player, item)) {
                             playTeleportSound(player);
                         } else {
+                            // Se o engine recusar (ABF ou Inv Cheio), tentamos devolver ao inv ou dropar
                             String mat = item.getType().name();
                             if (false == VirtualFilter.getInstance().getFilterRepo().hasFilter(player.getUniqueId(), "abf", mat)) {
-                                player.getInventory().addItem(item);
+                                HashMap<Integer, ItemStack> left = player.getInventory().addItem(item);
+                                if (false == left.isEmpty()) {
+                                    for (ItemStack s : left.values()) {
+                                        event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), s);
+                                    }
+                                }
                             } else {
-                                player.getWorld().dropItemNaturally(event.getBlock().getLocation(), item);
+                                // Se for item bloqueado (ABF), dropa no chao para sumir ou ser limpo
+                                event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), item);
                             }
                         }
                     }

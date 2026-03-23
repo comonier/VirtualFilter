@@ -96,7 +96,10 @@ public class VirtualFilter extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EntityLootListener(this.filterEngine), this);
 
         new Metrics(this, 29969);
-        getLogger().info("VirtualFilter v1.8.0 Enabled.");
+        
+        // Versao puxada automaticamente do plugin.yml
+        String version = getDescription().getVersion();
+        getLogger().info("VirtualFilter v" + version + " Enabled.");
     }
 
     private void loadMessages() {

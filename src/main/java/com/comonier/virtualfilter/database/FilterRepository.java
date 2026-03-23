@@ -1,15 +1,22 @@
 package com.comonier.virtualfilter.database;
+
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import java.sql.*;
 import java.util.UUID;
+
 public class FilterRepository {
     private final Connection connection;
-    public FilterRepository(Connection connection) { this.connection = connection; }
+
+    public FilterRepository(Connection connection) { 
+        this.connection = connection; 
+    }
+
     public synchronized boolean removeAndShift(UUID uuid, String type, int slotId) {
-        String t = type.toLowerCase(); String u = uuid.toString();
+        String t = type.toLowerCase(); 
+        String u = uuid.toString();
         try {
             connection.setAutoCommit(false);
             try (PreparedStatement ps = connection.prepareStatement("DELETE FROM player_filters WHERE uuid = ? AND filter_type = ? AND slot_id = ?")) {
@@ -18,7 +25,8 @@ public class FilterRepository {
             try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters SET slot_id = (slot_id * -1) WHERE uuid = ? AND filter_type = ? AND slot_id > ?")) {
                 ps.setString(1, u); ps.setString(2, t); ps.setInt(3, slotId); ps.executeUpdate();
             }
-            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters SET slot_id = (ABS(slot_id) - 1) WHERE uuid = ? AND filter_type = ? AND slot_id < 0")) {
+            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters SET slot_id = (ABS(slot_id) - 1) WHERE uuid = ? AND filter_type = ? AND slot_id != 0")) {
+                // Removido sinal de menor para evitar quebra
                 ps.setString(1, u); ps.setString(2, t); ps.executeUpdate();
             }
             connection.commit(); connection.setAutoCommit(true);
@@ -28,6 +36,7 @@ public class FilterRepository {
             e.printStackTrace(); return false;
         }
     }
+
     public String getMaterialAtSlot(UUID uuid, String type, int slot) {
         try (PreparedStatement ps = connection.prepareStatement("SELECT material FROM player_filters WHERE uuid = ? AND filter_type = ? AND slot_id = ?")) {
             ps.setString(1, uuid.toString()); ps.setString(2, type.toLowerCase()); ps.setInt(3, slot);
@@ -35,6 +44,7 @@ public class FilterRepository {
         } catch (SQLException e) { e.printStackTrace(); }
         return null;
     }
+
     public boolean hasFilter(UUID uuid, String type, String material) {
         try (PreparedStatement ps = connection.prepareStatement("SELECT 1 FROM player_filters WHERE uuid = ? AND filter_type = ? AND material = ?")) {
             ps.setString(1, uuid.toString()); ps.setString(2, type.toLowerCase()); ps.setString(3, material.toUpperCase());
@@ -42,6 +52,7 @@ public class FilterRepository {
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
+
     public long getISFAmount(UUID uuid, String material) {
         try (PreparedStatement ps = connection.prepareStatement("SELECT amount FROM player_filters WHERE uuid = ? AND material = ? AND filter_type = 'isf'")) {
             ps.setString(1, uuid.toString()); ps.setString(2, material.toUpperCase());
@@ -49,31 +60,64 @@ public class FilterRepository {
         } catch (SQLException e) { e.printStackTrace(); }
         return 0;
     }
+
     public void addAmount(UUID uuid, String material, long amount) {
         try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters SET amount = amount + ? WHERE uuid = ? AND material = ? AND filter_type = 'isf'")) {
             ps.setLong(1, amount); ps.setString(2, uuid.toString()); ps.setString(3, material.toUpperCase()); ps.executeUpdate();
         } catch (SQLException e) { e.printStackTrace(); }
     }
+
     public int withdrawFromISF(UUID uuid, String material, int requested) {
-        long current = getISFAmount(uuid, material); if (current <= 0) return 0;
-        int actual = (int) Math.min(current, (long) requested); addAmount(uuid, material, -actual); return actual;
+        long current = getISFAmount(uuid, material); 
+        if (0 >= current) return 0;
+        int actual = (int) Math.min(current, (long) requested); 
+        addAmount(uuid, material, -actual); 
+        return actual;
     }
+
     public void withdrawMassive(Player player, String materialName) {
-        Material mat = Material.getMaterial(materialName); if (mat == null) return;
-        UUID u = player.getUniqueId(); long currentTotal = getISFAmount(u, materialName);
-        if (currentTotal <= 0) return; int maxStack = mat.getMaxStackSize(); long initialTotal = currentTotal;
-        for (int i = 0; i < 36; i++) {
-            if (currentTotal <= 0) break; ItemStack item = player.getInventory().getItem(i);
+        Material mat = Material.getMaterial(materialName); 
+        if (mat == null) return;
+        UUID u = player.getUniqueId(); 
+        long currentTotal = getISFAmount(u, materialName);
+        if (0 >= currentTotal) return; 
+        
+        int maxStack = mat.getMaxStackSize(); 
+        long initialTotal = currentTotal;
+
+        for (int i = 0; 36 > i; i++) {
+            if (0 >= currentTotal) break; 
+            ItemStack item = player.getInventory().getItem(i);
+            
+            // Se o slot estiver vazio, cria um item NOVO (puro, sem meta)
             if (item == null || item.getType() == Material.AIR) {
                 int taking = (int) Math.min(currentTotal, (long) maxStack);
-                player.getInventory().setItem(i, new ItemStack(mat, taking)); currentTotal -= taking;
-            } else if (item.getType() == mat && maxStack > item.getAmount()) {
-                int taking = (int) Math.min(currentTotal, (long) (maxStack - item.getAmount()));
-                item.setAmount(item.getAmount() + taking); currentTotal -= taking;
+                player.getInventory().setItem(i, new ItemStack(mat, taking)); 
+                currentTotal -= taking;
+            } 
+            // Se o slot tiver um item do mesmo material
+            else if (item.getType() == mat) {
+                // SEGURANCA: Se o item tiver NOME ou META, ignoramos (nao mistura com ISF)
+                if (item.hasItemMeta()) {
+                    if (item.getItemMeta().hasDisplayName() || item.getItemMeta().hasCustomModelData()) {
+                        continue; 
+                    }
+                }
+                
+                // Se for item comum, completa o stack
+                if (maxStack > item.getAmount()) {
+                    int taking = (int) Math.min(currentTotal, (long) (maxStack - item.getAmount()));
+                    item.setAmount(item.getAmount() + taking); 
+                    currentTotal -= taking;
+                }
             }
         }
         long withdrawn = initialTotal - currentTotal;
         if (withdrawn > 0) addAmount(u, materialName, -withdrawn);
-        if (currentTotal > 0) { player.sendMessage("§6[VF] §c§lFULL INVENTORY!"); player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f); }
+        
+        if (currentTotal > 0) { 
+            player.sendMessage("§6[VF] §c§lFULL INVENTORY!"); 
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f); 
+        }
     }
 }

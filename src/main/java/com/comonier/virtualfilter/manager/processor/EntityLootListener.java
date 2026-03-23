@@ -22,14 +22,22 @@ public class EntityLootListener implements Listener {
     private final FilterEngine engine;
     private final HashMap<UUID, Long> soundCooldowns = new HashMap<>();
 
-    public EntityLootListener(FilterEngine engine) { this.engine = engine; }
+    public EntityLootListener(FilterEngine engine) { 
+        this.engine = engine; 
+    }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+        
+        // CORRECAO: Se o SafeDrop estiver desativado, o item fica no chao e o código para aqui
+        if (false == VirtualFilter.getInstance().getSettingsRepo().isSafeDropEnabled(uuid)) {
+            return;
+        }
+
         Item itemEntity = event.getItemDrop();
         ItemStack stack = itemEntity.getItemStack();
-        UUID uuid = player.getUniqueId();
         
         itemEntity.setMetadata("manual_drop", new FixedMetadataValue(VirtualFilter.getInstance(), true));
         itemEntity.setMetadata("drop_owner", new FixedMetadataValue(VirtualFilter.getInstance(), uuid.toString()));
@@ -39,17 +47,21 @@ public class EntityLootListener implements Listener {
             int timer = 10;
             @Override
             public void run() {
-                if (false == itemEntity.isValid() || itemEntity.isDead()) { this.cancel(); return; }
+                if (false == itemEntity.isValid() || itemEntity.isDead()) { 
+                    this.cancel(); return; 
+                }
+                
+                // CORRECAO: Se o jogador desativar o SD durante a contagem, cancelamos o retorno automatico
+                if (false == VirtualFilter.getInstance().getSettingsRepo().isSafeDropEnabled(uuid)) {
+                    this.cancel(); return;
+                }
                 
                 if (timer > 0) {
-                    // Só envia a mensagem se o SafeDrop ainda estiver ativado para o jogador
-                    if (VirtualFilter.getInstance().getSettingsRepo().isSafeDropEnabled(uuid)) {
-                        String lang = VirtualFilter.getInstance().getSettingsRepo().getPlayerLanguage(uuid);
-                        String msg = VirtualFilter.getInstance().getMsg(lang, "safedrop_countdown")
-                                .replace("%item%", stack.getType().name())
-                                .replace("%time%", String.valueOf(timer));
-                        player.sendMessage(msg);
-                    }
+                    String lang = VirtualFilter.getInstance().getSettingsRepo().getPlayerLanguage(uuid);
+                    String msg = VirtualFilter.getInstance().getMsg(lang, "safedrop_countdown")
+                            .replace("%item%", stack.getType().name())
+                            .replace("%time%", String.valueOf(timer));
+                    player.sendMessage(msg);
                     timer--;
                 } else {
                     handleAutoReturn(player, itemEntity);
@@ -96,6 +108,7 @@ public class EntityLootListener implements Listener {
         if (entity.hasMetadata("drop_owner")) {
             UUID owner = UUID.fromString(entity.getMetadata("drop_owner").get(0).asString());
             
+            // So aplica a protecao de 10s se o dono ainda tiver o SafeDrop ligado
             if (VirtualFilter.getInstance().getSettingsRepo().isSafeDropEnabled(owner)) {
                 long dropTime = entity.getMetadata("drop_time").get(0).asLong();
                 long diff = System.currentTimeMillis() - dropTime;
@@ -139,7 +152,9 @@ public class EntityLootListener implements Listener {
             Iterator<ItemStack> it = event.getDrops().iterator();
             while (it.hasNext()) {
                 ItemStack drop = it.next();
-                if (engine.process(killer, drop)) { it.remove(); playTeleportSound(killer); }
+                if (engine.process(killer, drop)) { 
+                    it.remove(); playTeleportSound(killer); 
+                }
             }
         }
     }

@@ -1,71 +1,70 @@
 name: VirtualFilter
-version: 1.8.0
+version: 1.8.1
 main: com.comonier.virtualfilter.VirtualFilter
 api-version: 1.21
 depend: [Vault]
-softdepend: [ShopGUIPlus]
 
 commands:
   abf:
-    description: Abre o menu do AutoBlock.
+    description: Opens the AutoBlock menu.
   isf:
-    description: Abre o menu do InfinityStack.
+    description: Opens the InfinityStack menu.
   asf:
-    description: Abre o menu do AutoSell.
+    description: Opens the AutoSell menu.
   isfe:
-    description: Abre o menu do InfinityStack Edit (Itens Editados).
+    description: Opens the InfinityStack Edit (Edited Items) menu.
   addabf:
-    description: Adiciona o item da mao ao AutoBlock.
+    description: Adds the item in hand to AutoBlock.
   addisf:
-    description: Adiciona o item da mao ao InfinityStack.
+    description: Adds the item in hand to InfinityStack.
   addasf:
-    description: Adiciona o item da mao ao AutoSell.
+    description: Adds the item in hand to AutoSell.
   addisfe:
-    description: Adiciona o item editado da mao ao InfinityStack Edit.
+    description: Adds the edited item in hand to InfinityStack Edit.
   remabf:
-    description: Remove o item da mao ou por slot do AutoBlock.
+    description: Removes a filter from AutoBlock by hand or slot ID.
     aliases: [rabf]
   remisf:
-    description: Remove o item da mao ou por slot do InfinityStack.
+    description: Removes a filter from InfinityStack by hand or slot ID.
     aliases: [risf]
   remasf:
-    description: Remove o item da mao ou por slot do AutoSell.
+    description: Removes a filter from AutoSell by hand or slot ID.
     aliases: [rasf]
   remisfe:
-    description: Remove o item editado da mao ou por slot do ISFE.
+    description: Removes an edited filter from ISFE by hand or slot ID.
     aliases: [risfe]
   getisf:
-    description: Saca itens do seu estoque ISF por ID do slot.
-    aliases: [sacar, getisf, isg]
+    description: Withdraws items from your ISF storage by slot ID.
+    aliases: [sacar, isg]
   getisfe:
-    description: Saca itens do seu estoque ISFE por ID do slot.
+    description: Withdraws items from your ISFE storage by slot ID.
     aliases: [sacaredit]
   al:
-    description: Ativa/Desativa o AutoLoot.
+    description: Enables/Disables AutoLoot.
   afh:
-    description: Ativa/Desativa o AutoFillHand (Busca no ISF).
+    description: Enables/Disables AutoFillHand (ISF search).
   lo:
-    description: Ativa/Desativa a visualizacao das suas proprias logs de loot.
+    description: Enables/Disables viewing your own loot logs.
     aliases: [vflogsown]
   la:
-    description: Ativa/Desativa a visualizacao das logs de loot de outros jogadores proximos.
+    description: Enables/Disables viewing loot logs from nearby players.
     aliases: [vflogsall]
   vfat:
-    description: Alterna avisos na Action Bar.
+    description: Toggles notifications in the Action Bar.
   sd:
-    description: Alterna a protecao de 10 segundos para itens jogados no chao.
+    description: Toggles the 10-second protection for dropped items.
     aliases: [safedrop]
   vflang:
-    description: Altera o idioma pessoal (en/pt).
+    description: Changes personal language (en/pt).
   vfhelp:
-    description: Mostra o menu de ajuda.
+    description: Shows the help menu.
     aliases: [vf, vfilter]
   vfreload:
-    description: Recarrega as configuracoes.
+    description: Reloads the configuration files.
     permission: virtualfilter.admin
-    permission-message: §cSem permissao.
+    permission-message: §cNo permission.
 
 permissions:
   virtualfilter.admin:
-    description: Permissao para usar o reload do plugin.
+    description: Permission to use the plugin reload command.
     default: op

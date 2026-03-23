@@ -123,10 +123,15 @@ public class PlayerInventoryListener implements Listener {
                 long totalAdded = 0;
                 for (ItemStack invItem : player.getInventory().getStorageContents()) {
                     if (invItem != null && invItem.getType() == matType && invItem.getEnchantments().isEmpty()) {
-                        if (false == (invItem.hasItemMeta() && invItem.getItemMeta().hasDisplayName())) {
-                            totalAdded += invItem.getAmount();
-                            invItem.setAmount(0);
+                        // MODIFICACAO AQUI: Ignora se tiver nome ou meta customizada
+                        if (invItem.hasItemMeta()) {
+                            if (invItem.getItemMeta().hasDisplayName() || invItem.getItemMeta().hasCustomModelData()) {
+                                continue;
+                            }
                         }
+                        
+                        totalAdded += invItem.getAmount();
+                        invItem.setAmount(0);
                     }
                 }
                 if (totalAdded > 0) {
@@ -150,10 +155,15 @@ public class PlayerInventoryListener implements Listener {
             if (type.equals("isf")) {
                 for (ItemStack invItem : player.getInventory().getStorageContents()) {
                     if (invItem != null && invItem.getType() == matType && invItem.getEnchantments().isEmpty()) {
-                        if (false == (invItem.hasItemMeta() && invItem.getItemMeta().hasDisplayName())) {
-                            total += invItem.getAmount();
-                            invItem.setAmount(0);
+                        // MODIFICACAO AQUI: Mesma trava de meta na criacao do filtro
+                        if (invItem.hasItemMeta()) {
+                            if (invItem.getItemMeta().hasDisplayName() || invItem.getItemMeta().hasCustomModelData()) {
+                                continue;
+                            }
                         }
+                        
+                        total += invItem.getAmount();
+                        invItem.setAmount(0);
                     }
                 }
             }

@@ -58,17 +58,12 @@ public class StorageCommands implements CommandExecutor {
             if (taken > 0) {
                 Material mat = Material.getMaterial(matName);
                 if (null != mat) {
-                    HashMap<Integer, ItemStack> left = player.getInventory().addItem(new ItemStack(mat, taken));
-                    int kept = taken;
+                    ItemStack isfItem = new ItemStack(mat, taken);
+                    int remaining = fillSpecificSlots(player, isfItem);
+                    int kept = taken - remaining;
 
-                    if (false == left.isEmpty()) {
-                        int rem = 0; 
-                        for (ItemStack s : left.values()) {
-                            rem += s.getAmount();
-                        }
-                        VirtualFilter.getInstance().getFilterRepo().addAmount(uuid, matName, (long) rem);
-                        kept = taken - rem;
-                        
+                    if (remaining > 0) {
+                        VirtualFilter.getInstance().getFilterRepo().addAmount(uuid, matName, (long) remaining);
                         player.sendMessage("§6[VF] §c§lFULL INVENTORY!");
                         player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                     }
@@ -91,5 +86,44 @@ public class StorageCommands implements CommandExecutor {
             player.sendMessage("§c§lERROR: §fUse números válidos."); 
         }
         return true;
+    }
+
+    private int fillSpecificSlots(Player player, ItemStack toAdd) {
+        int left = toAdd.getAmount();
+        ItemStack[] contents = player.getInventory().getStorageContents();
+        
+        // Passada 1: Completa stacks de itens que NAO possuem Meta
+        for (ItemStack invItem : contents) {
+            if (invItem != null && invItem.getType() == toAdd.getType()) {
+                if (invItem.hasItemMeta()) {
+                    if (invItem.getItemMeta().hasDisplayName() || invItem.getItemMeta().hasCustomModelData()) {
+                        continue;
+                    }
+                }
+                
+                int canAdd = invItem.getMaxStackSize() - invItem.getAmount();
+                if (canAdd > 0) {
+                    int taking = Math.min(left, canAdd);
+                    invItem.setAmount(invItem.getAmount() + taking);
+                    left -= taking;
+                }
+            }
+            if (0 >= left) break;
+        }
+        
+        // Passada 2: Preenche slots vazios
+        if (left > 0) {
+            for (int i = 0; contents.length > i; i++) {
+                if (contents[i] == null || contents[i].getType() == Material.AIR) {
+                    int taking = Math.min(left, toAdd.getMaxStackSize());
+                    ItemStack newItem = toAdd.clone();
+                    newItem.setAmount(taking);
+                    player.getInventory().setItem(i, newItem);
+                    left -= taking;
+                }
+                if (0 >= left) break;
+            }
+        }
+        return left;
     }
 }
