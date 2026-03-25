@@ -19,21 +19,32 @@ public class FilterRepository {
         String u = uuid.toString();
         try {
             connection.setAutoCommit(false);
+            
+            // 1. Remove o filtro alvo
             try (PreparedStatement ps = connection.prepareStatement("DELETE FROM player_filters WHERE uuid = ? AND filter_type = ? AND slot_id = ?")) {
-                ps.setString(1, u); ps.setString(2, t); ps.setInt(3, slotId); ps.executeUpdate();
+                ps.setString(1, u); ps.setString(2, t); ps.setInt(3, slotId); 
+                ps.executeUpdate();
             }
-            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters SET slot_id = (slot_id * -1) WHERE uuid = ? AND filter_type = ? AND slot_id > ?")) {
-                ps.setString(1, u); ps.setString(2, t); ps.setInt(3, slotId); ps.executeUpdate();
+            
+            // 2. Move os slots afetados para uma zona temporaria negativa para evitar UNIQUE constraint
+            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters SET slot_id = (slot_id * -1) - 100 WHERE uuid = ? AND filter_type = ? AND slot_id > ?")) {
+                ps.setString(1, u); ps.setString(2, t); ps.setInt(3, slotId); 
+                ps.executeUpdate();
             }
-            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters SET slot_id = (ABS(slot_id) - 1) WHERE uuid = ? AND filter_type = ? AND slot_id != 0")) {
-                // Removido sinal de menor para evitar quebra
-                ps.setString(1, u); ps.setString(2, t); ps.executeUpdate();
+            
+            // 3. Traz de volta para o ID correto (ID original - 1)
+            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters SET slot_id = (ABS(slot_id + 100) - 1) WHERE uuid = ? AND filter_type = ? AND 0 > slot_id")) {
+                ps.setString(1, u); ps.setString(2, t); 
+                ps.executeUpdate();
             }
-            connection.commit(); connection.setAutoCommit(true);
+            
+            connection.commit(); 
+            connection.setAutoCommit(true);
             return true;
         } catch (SQLException e) {
             try { connection.rollback(); connection.setAutoCommit(true); } catch (SQLException ignored) {}
-            e.printStackTrace(); return false;
+            e.printStackTrace(); 
+            return false;
         }
     }
 
@@ -89,22 +100,17 @@ public class FilterRepository {
             if (0 >= currentTotal) break; 
             ItemStack item = player.getInventory().getItem(i);
             
-            // Se o slot estiver vazio, cria um item NOVO (puro, sem meta)
             if (item == null || item.getType() == Material.AIR) {
                 int taking = (int) Math.min(currentTotal, (long) maxStack);
                 player.getInventory().setItem(i, new ItemStack(mat, taking)); 
                 currentTotal -= taking;
             } 
-            // Se o slot tiver um item do mesmo material
             else if (item.getType() == mat) {
-                // SEGURANCA: Se o item tiver NOME ou META, ignoramos (nao mistura com ISF)
                 if (item.hasItemMeta()) {
                     if (item.getItemMeta().hasDisplayName() || item.getItemMeta().hasCustomModelData()) {
                         continue; 
                     }
                 }
-                
-                // Se for item comum, completa o stack
                 if (maxStack > item.getAmount()) {
                     int taking = (int) Math.min(currentTotal, (long) (maxStack - item.getAmount()));
                     item.setAmount(item.getAmount() + taking); 

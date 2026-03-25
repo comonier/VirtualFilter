@@ -1,5 +1,5 @@
 # VirtualFilter
-**Version:** 1.8.1
+**Version:** 1.8.2
 **Developer:** Comonier  
 **Compatibility:** Paper/Spigot 1.21.1+ (Java 21)
 

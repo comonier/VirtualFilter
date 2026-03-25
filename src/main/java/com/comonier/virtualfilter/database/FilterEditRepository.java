@@ -11,26 +11,41 @@ import java.util.UUID;
 public class FilterEditRepository {
     private final Connection connection;
 
-    public FilterEditRepository(Connection connection) { this.connection = connection; }
+    public FilterEditRepository(Connection connection) { 
+        this.connection = connection; 
+    }
 
     public synchronized boolean removeAndShift(UUID uuid, String type, int slotId) {
-        String t = type.toLowerCase(); String u = uuid.toString();
+        String t = type.toLowerCase(); 
+        String u = uuid.toString();
         try {
             connection.setAutoCommit(false);
+            
+            // 1. Remove o filtro alvo
             try (PreparedStatement ps = connection.prepareStatement("DELETE FROM player_filters_edit WHERE uuid = ? AND filter_type = ? AND slot_id = ?")) {
-                ps.setString(1, u); ps.setString(2, t); ps.setInt(3, slotId); ps.executeUpdate();
+                ps.setString(1, u); ps.setString(2, t); ps.setInt(3, slotId); 
+                ps.executeUpdate();
             }
-            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters_edit SET slot_id = (slot_id * -1) WHERE uuid = ? AND filter_type = ? AND slot_id > ?")) {
-                ps.setString(1, u); ps.setString(2, t); ps.setInt(3, slotId); ps.executeUpdate();
+            
+            // 2. Move os slots afetados para uma zona temporaria negativa segura
+            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters_edit SET slot_id = (slot_id * -1) - 100 WHERE uuid = ? AND filter_type = ? AND slot_id > ?")) {
+                ps.setString(1, u); ps.setString(2, t); ps.setInt(3, slotId); 
+                ps.executeUpdate();
             }
-            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters_edit SET slot_id = (ABS(slot_id) - 1) WHERE uuid = ? AND filter_type = ? AND slot_id < 0")) {
-                ps.setString(1, u); ps.setString(2, t); ps.executeUpdate();
+            
+            // 3. Traz de volta para o ID correto (ID original - 1)
+            try (PreparedStatement ps = connection.prepareStatement("UPDATE player_filters_edit SET slot_id = (ABS(slot_id + 100) - 1) WHERE uuid = ? AND filter_type = ? AND 0 > slot_id")) {
+                ps.setString(1, u); ps.setString(2, t); 
+                ps.executeUpdate();
             }
-            connection.commit(); connection.setAutoCommit(true);
+            
+            connection.commit(); 
+            connection.setAutoCommit(true);
             return true;
         } catch (SQLException e) {
             try { connection.rollback(); connection.setAutoCommit(true); } catch (SQLException ignored) {}
-            e.printStackTrace(); return false;
+            e.printStackTrace(); 
+            return false;
         }
     }
 
@@ -80,14 +95,22 @@ public class FilterEditRepository {
     }
 
     public int withdrawFromISFE(UUID uuid, String material, String customName, int requested) {
-        long current = getISFEAmount(uuid, material, customName); if (current <= 0) return 0;
-        int actual = (int) Math.min(current, (long) requested); addAmount(uuid, material, customName, -actual); return actual;
+        long current = getISFEAmount(uuid, material, customName); 
+        if (0 >= current) return 0;
+        int actual = (int) Math.min(current, (long) requested); 
+        addAmount(uuid, material, customName, -actual); 
+        return actual;
     }
 
     public void withdrawMassive(Player player, String materialName, String customName) {
-        Material mat = Material.getMaterial(materialName); if (mat == null) return;
-        UUID u = player.getUniqueId(); long currentTotal = getISFEAmount(u, materialName, customName);
-        if (currentTotal <= 0) return; int maxStack = mat.getMaxStackSize(); long initialTotal = currentTotal;
+        Material mat = Material.getMaterial(materialName); 
+        if (mat == null) return;
+        UUID u = player.getUniqueId(); 
+        long currentTotal = getISFEAmount(u, materialName, customName);
+        if (0 >= currentTotal) return; 
+        
+        int maxStack = mat.getMaxStackSize(); 
+        long initialTotal = currentTotal;
         
         ItemStack template = getItemTemplate(u, materialName, customName);
 
@@ -99,10 +122,14 @@ public class FilterEditRepository {
                 ItemStack newItem = (null != template) ? template.clone() : new ItemStack(mat);
                 if (null == template) {
                     ItemMeta meta = newItem.getItemMeta();
-                    if (null != meta) { meta.setDisplayName(customName); newItem.setItemMeta(meta); }
+                    if (null != meta) { 
+                        meta.setDisplayName(customName); 
+                        newItem.setItemMeta(meta); 
+                    }
                 }
                 newItem.setAmount(taking);
-                player.getInventory().setItem(i, newItem); currentTotal -= taking;
+                player.getInventory().setItem(i, newItem); 
+                currentTotal -= taking;
             }
         }
         long withdrawn = initialTotal - currentTotal;

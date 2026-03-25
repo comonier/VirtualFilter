@@ -54,15 +54,24 @@ public class RemFilterEditCommand implements CommandExecutor {
                 player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "filter_not_found"));
                 return true;
             }
-            if (0 < VirtualFilter.getInstance().getFilterEditRepo().getISFEAmount(uuid, data[0], data[1])) {
+            
+            // Segurança: Nao permite remover se ainda houver estoque (logica inversa)
+            long amount = VirtualFilter.getInstance().getFilterEditRepo().getISFEAmount(uuid, data[0], data[1]);
+            if (0 < amount) {
                 player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "delete_blocked_isf"));
                 return true;
             }
+
             if (VirtualFilter.getInstance().getFilterEditRepo().removeAndShift(uuid, type, targetSlot)) {
                 player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "removed")
                         .replace("%type%", "ISFE").replace("%item%", data[1]));
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
-                FilterEditMenu.open(player);
+                
+                // Sincronização segura para reabrir o menu ISFE
+                VirtualFilter.getInstance().getServer().getScheduler().runTaskLater(VirtualFilter.getInstance(), () -> {
+                    player.updateInventory();
+                    FilterEditMenu.open(player);
+                }, 2L);
             }
         } else {
             player.sendMessage(VirtualFilter.getInstance().getMsg(lang, "filter_not_found"));
